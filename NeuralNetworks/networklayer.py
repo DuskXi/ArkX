@@ -46,8 +46,8 @@ class ConvolutionalNeuralNetworkCore:
     """
 
     def __init__(self):
-        self.DictODModel: Dict[str, ModelObjectDetection] = {}
-        self.DictICModel: Dict[str, ModelImageClassification] = {}
+        self.dictODModel: Dict[str, ModelObjectDetection] = {}
+        self.dictICModel: Dict[str, ModelImageClassification] = {}
 
     def loadODModel(self, name, path, pbtxt):
         """
@@ -59,7 +59,7 @@ class ConvolutionalNeuralNetworkCore:
         """
         model = ModelObjectDetection()
         model.loadModel(name, path, pbtxt)
-        self.DictODModel[name] = model
+        self.dictODModel[name] = model
 
     def detectObject(self, name, image):
         """
@@ -68,7 +68,7 @@ class ConvolutionalNeuralNetworkCore:
         :param image: 图像(ndarray)
         :return: 对象检测结果
         """
-        return self.DictODModel[name].detectObject(image)
+        return self.dictODModel[name].detectObject(image)
 
     def drawBox(self, name, image):
         """
@@ -77,7 +77,7 @@ class ConvolutionalNeuralNetworkCore:
         :param image: 图像(ndarray)
         :return: None
         """
-        self.DictODModel[name].drawBox(image)
+        self.dictODModel[name].drawBox(image)
 
     def getBoxData(self, name, im_width, im_height) -> dict:
         """
@@ -87,7 +87,7 @@ class ConvolutionalNeuralNetworkCore:
         :param im_height: 图像高度
         :return: box数据
         """
-        return self.DictODModel[name].getBoxData(im_width, im_height)
+        return self.dictODModel[name].getBoxData(im_width, im_height)
 
     def loadICModel(self, name, path, classes):
         """
@@ -99,7 +99,7 @@ class ConvolutionalNeuralNetworkCore:
         """
         model = ModelImageClassification()
         model.loadModel(name, path, classes)
-        self.DictICModel[name] = model
+        self.dictICModel[name] = model
 
     def classifyImages(self, name, image) -> dict:
         """
@@ -109,7 +109,7 @@ class ConvolutionalNeuralNetworkCore:
         :return: 原始分类数据
         """
         image_np = np.array(Image.fromarray(image.copy()).resize((960, 540)))
-        return self.DictICModel[name].classifyImages(np.array([image_np]))
+        return self.dictICModel[name].classifyImages(np.array([image_np]))
 
     def getClassification(self, name, image) -> [str]:
         """
@@ -119,7 +119,7 @@ class ConvolutionalNeuralNetworkCore:
         :return: 可能性最大的图像类型
         """
         image_np = np.array(Image.fromarray(image.copy()).resize((960, 540)))
-        return self.DictICModel[name].getClassification(np.array([image_np]))
+        return self.dictICModel[name].getClassification(np.array([image_np]))
 
     def getClassificationFromBuffer(self, name) -> [str]:
         """
@@ -127,7 +127,7 @@ class ConvolutionalNeuralNetworkCore:
         :param name: 模型id
         :return: 可能性最大的图像类型
         """
-        return self.DictICModel[name].getClassificationFromBuffer()
+        return self.dictICModel[name].getClassificationFromBuffer()
 
 
 class ModelImageClassification:
