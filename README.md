@@ -24,15 +24,15 @@
 
 ## 将要实现的功能(核心功能)
 
-1. - [ ] 对游戏界面进行判断(实验结论为使用自定义网络的Tensorflow的图像分类模型)
+1. - [X] 对游戏界面进行判断(实验结论为使用自定义网络的Tensorflow的图像分类模型)
 
 2. - [ ] 从图像中获取各类按钮的坐标(实验结论为使用基于Tensorflow的ObjectDetectionAPI库)
 
-3. - [ ] 识别文字(实验结论为使用同样基于Tensorflow的PaddleOCR)
+3. - [X] 识别文字(实验结论为使用同样基于Tensorflow的PaddleOCR)
 
-4. - [ ] 利用adb获取串流(经过实验后结论为使用 scrcpy)
+4. - [X] 利用adb获取串流(经过实验后结论为使用 scrcpy)
 
-5. - [ ] 利用adb实现点击(也使用scrcpy)
+5. - [X] 利用adb实现点击(也使用scrcpy)
 
 6. - [ ] 用于清理智的操作逻辑程序
 
