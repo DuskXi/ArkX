@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"
+            integrity="sha512-2rNj2KJ+D8s1ceNasTIex6z4HWyOnEYLVC3FigGOmyQCZc2eBXKgOxQmo3oKLHyfcj53uz4QMsRCWNbLd32Q1g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
+          integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+            integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
+            integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@next"></script>
+
+    <!-- Lastly add this package -->
+    <script src="https://cdn.jsdelivr.net/npm/vue-toast-notification@3"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vue-toast-notification@3/dist/theme-sugar.css" rel="stylesheet">
+
+    <link href='https://cdn.jsdelivr.net/npm/css.gg/icons/all.css' rel='stylesheet'>
+    <title>Hello, world!</title>
+
+    <style>
+        body {
+            background: url('/static/background.png') no-repeat center fixed;
+            background-size: cover;
+        }
+
+        .mainBody {
+            background-color: rgba(255, 255, 255, 0.4);
+            height: 100VH;
+            margin-bottom: 0;
+        }
+
+        .backgroundC {
+            background-color: rgba(248, 249, 250, 0.35)
+        }
+    </style>
+</head>
+<body>
+<div class="mainBody" id="app">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Index</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/list">List</a>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                </form>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row justify-content-md-center" style="margin-top: 20px">
+            <div class="col col-lg-4">
+                <h4> Control Area</h4>
+
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="inputGroupSelect01">任务类型</label>
+                    <select class="form-select" id="inputGroupSelect01" v-model="continuousModeStr">
+                        <option value="false" selected>单次任务</option>
+                        <option value="true">持续性任务</option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text">循环次数</span>
+                    <input type="text" class="form-control" placeholder="4" v-model="frequency">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">自动添加理智次数</span>
+                    <input type="text" class="form-control" placeholder="0" v-model="sanityTimes">
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" v-model="useStone">
+                    <label class="form-check-label">是否使用源石</label>
+                </div>
+                <div class="input-group mb-3" :style="continuousMode?'':'display: none'">
+                    <span class="input-group-text">循环模式中, 任务间休眠时长(分钟)</span>
+                    <input type="text" class="form-control" placeholder="1"
+                           :class="continuousMode?'':'display: none'" v-model="intervalTime">
+                </div>
+                <div class="input-group mb-3" :style="continuousMode?'':'display: none'">
+                    <span class="input-group-text">最低倍率(当理智>x * 关卡消耗)</span>
+                    <input type="text" class="form-control" placeholder="1"
+                           v-model="minStartMultiple">
+                </div>
+                <div class="btn-group" role="group" aria-label="">
+                    <button type="button" class="btn btn-primary" @click="loadDevice"
+                            :disabled="!connectionButtonEnabled">
+                        加载设备
+                    </button>
+                    <button type="button" class="btn btn-success" @click="startTask" :disabled="!startButtonEnabled">
+                        开始任务
+                    </button>
+                    <button type="button" class="btn btn-danger" @click="stopTask" :disabled="!stopButtonEnabled">
+                        中断任务
+                    </button>
+                    <button type="button" class="btn btn-light" @click="updateScreenInfo"
+                            :disabled="!(startButtonEnabled && !connectionButtonEnabled)">
+                        界面信息提取
+                    </button>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" v-model="disableUpdate">
+                    <label class="form-check-label">关闭信息更新</label>
+                </div>
+            </div>
+            <div class="col col-lg-8" id="infoTarget" :style="listInfoGroupsStyle">
+                <h4> Information Board</h4>
+                <div class="list-group">
+                    <a class="list-group-item list-group-item-action backgroundC">
+                        <!--                        active-->
+                        <div class="d-flex w-100 justify-content-between">
+                            <h4 class="mb-1">设备名:</h4>
+                        </div>
+                        <p class="mb-1"></p>
+                        <small class="text-muted">{{ deviceName }}</small>
+                    </a>
+
+                    <a class="list-group-item list-group-item-action backgroundC">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h4 class="mb-1">分辨率:</h4>
+                        </div>
+                        <p class="mb-1"></p>
+                        <small class="text-muted">{{ resolution.width }} x {{ resolution.height }}</small>
+                    </a>
+
+                    <a class="list-group-item list-group-item-action backgroundC">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h4 class="mb-1">当前画面分类:</h4>
+                        </div>
+                        <p class="mb-1"></p>
+                        <small class="text-muted">{{ screen }}</small>
+                    </a>
+
+                    <a class="list-group-item list-group-item-action backgroundC">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h4 class="mb-1">任务信息:</h4>
+                        </div>
+                        <p class="mb-1">{{ TaskStatusList[TaskStatus] }}</p>
+                        <small class="text-muted">{{ TaskTypeList[TaskType] }}</small>
+                    </a>
+                </div>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">当前剩余理智</th>
+                        <th scope="col">最大自然可恢复理智</th>
+                        <th scope="col">当前关卡理智消耗</th>
+                        <th scope="col">是否勾选代理作战(如果没有勾选AI会自动勾选)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-if="Object.keys(levelInfo).length > 1">
+                        <th scope="row">{{levelInfo.sanity[0]}}</th>
+                        <td>{{levelInfo.sanity[1]}}</td>
+                        <td>{{levelInfo.levelSanity}}</td>
+                        <td>{{levelInfo.proxy}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">剩余任务循环次数</th>
+                        <th scope="col">剩余可用理智添加次数</th>
+                        <th scope="col">是否启用源石添加理智</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row">{{task.frequency}}</th>
+                        <td>{{task.useSanity}}</td>
+                        <td>{{task.enableStone ?"是":"否"}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4> 当前战斗进度 ({{ fightProgress == null ? "" : fightProgress[0] + "/" + fightProgress[1] }})</h4>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                         :style="'width: '+ (fightProgress == null ? 0 : ((fightProgress[0]/fightProgress[1])*100).toFixed(2)) +'%'">
+                        {{ fightProgress == null ? 0 : ((fightProgress[0]/fightProgress[1])*100).toFixed(2) }} %
+                    </div>
+                </div>
+
+                <h4 v-if="taskProgress != null"> 任务进度 ({{ taskProgress == null ? "" : (taskProgress[1] -
+                    taskProgress[0]) + "/" + taskProgress[1] }})</h4>
+                <div class="progress" v-if="taskProgress != null">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                         :style="'width: '+ (taskProgress == null ? 0 : (((taskProgress[1]-taskProgress[0])/taskProgress[1])*100).toFixed(2)) +'%'">
+                        {{ taskProgress == null ? 0 : (((taskProgress[1] -
+                        taskProgress[0])/taskProgress[1])*100).toFixed(2) }} %
+                    </div>
+                </div>
+
+                <h2> 性能数据</h2>
+                <label class="form-label">时间区间: {{limitInfo.name[limitInfo.currentId]}}</label>
+                <input type="range" class="form-range" min="0" max="5" step="1" v-model="limitInfo.currentId">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" v-model="disableFirstTimes">
+                    <label class="form-check-label">不计入首次检测信息</label>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">类型</th>
+                        <th scope="col">模型</th>
+                        <th scope="col">检测次数</th>
+                        <th scope="col">时长</th>
+                        <th scope="col">精准度</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(information, i) in getTotalData()">
+                        <th scope="row" v-if="information!=null">{{information.type}}</th>
+                        <td v-if="information!=null">{{information.name}}</td>
+                        <td v-if="information!=null">{{information.count}}</td>
+                        <td v-if="information!=null">{{(information.averageTime * 1000).toFixed(0)}} ms</td>
+                        <td v-if="information!=null">{{(information.averagePercentage *100).toFixed(2)}} %</td>
+                        <td v-if="information==null" colspan="5">
+                            <table class="table table-dark table-sm">
+                                <thead>
+                                <tr>
+                                    <th scope="col">对象名称</th>
+                                    <th scope="col">检测次数</th>
+                                    <th scope="col">平均时长</th>
+                                    <th scope="col">平均精准度</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="data in getTotalData()[i-1].data">
+                                    <th scope="row">{{ data.name }}</th>
+                                    <td>{{data.times}}</td>
+                                    <td>{{(data.timeLong * 1000).toFixed(0)}} ms</td>
+                                    <td>{{(data.percentage * 100).toFixed(2)}} %</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+<script>
+    function avg(arr) {
+        let sum = 0;
+        for (let i = 0; i < arr.length; i++) {
+            sum += arr[i];
+        }
+        return sum / arr.length;
+    }
+
+    var socket = io('ws://127.0.0.1:5000'); //192.248.168.119 'ws://127.0.0.1:5000'
+    const Counter = {
+        data() {
+            return {
+                disableUpdate: false,
+                socket: socket,
+                frequency: 3,
+                sanityTimes: 0,
+                useStone: false,
+                deviceName: '',
+                disableFirstTimes: true,
+                resolution: {
+                    width: -1,
+                    height: -1
+                },
+                performance: {
+                    "classifyModel": [],
+                    "objectModel": [],
+                    "ocrModel": []
+                },
+                screen: "UNKNOWN",
+                task: {},
+                TaskStatus: "UNKNOWN",
+                TaskStatusList: {
+                    "True": "运行中",
+                    "False": "未运行或已完成",
+                    "Stopped": "未运行或已完成",
+                    "RunningTask": "正在运行子任务",
+                    "Running": "运行中",
+                    "Sleeping": "休眠中",
+                    "UNKNOWN": ""
+                },
+                TaskType: "",
+                TaskTypeList: {
+                    "UNKNOWN": "未开始",
+                    "Single": "单次任务",
+                    "ContinuousTask": "持续性任务"
+                },
+                limitTime: 2 * 60 * 60,
+                limitInfo: {
+                    name: ["10分钟", "1小时", "2小时", "6小时", "12小时", "24小时"],
+                    time: [10 * 60, 60 * 60, 2 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60],
+                    currentId: 2
+                },
+                levelInfo: {},
+                connectionButtonEnabled: true,
+                startButtonEnabled: true,
+                stopButtonEnabled: false,
+                continuousMode: false,
+                intervalTime: 3 * 60,
+                minStartMultiple: 1,
+                continuousModeStr: "false",
+                connectionError: false,
+                fightProgress: null,
+                listInfoGroupsStyle: {},
+                taskProgress: {},
+                taskBufferLock: false,
+            }
+        },
+        methods: {
+            onRangeValueChanged() {
+                this.limitTime = this.limitInfo.time[this.limitInfo.currentId];
+            },
+            getTotalData() {
+                let arrayClassify = this.getClassifyModelData()
+                let arrayObject = this.getObjectModelData()
+                let newArrayObject = []
+                arrayObject.forEach(element => {
+                    newArrayObject.push(element);
+                    newArrayObject.push(null);
+                });
+                return arrayClassify.concat(newArrayObject).concat(this.getClassifyModelData("ocrModel"));
+            },
+            getClassifyModelData(typeStr = "classifyModel") {
+                let dataset = this.performance[typeStr];
+                let result = []
+                dataset.forEach(data => {
+                    let arrayTime = []
+                    let percentages = []
+                    let timeSum = 0
+                    let percentageSum = 0
+                    let count = 0
+                    data.dataset.forEach(element => {
+                        count++
+                        if (this.checkTime(element["datetime"])) {
+                            arrayTime.push(element["timeLong"])
+                            timeSum += element["timeLong"]
+                            percentages.push(element["percentage"])
+                            percentageSum += element["percentage"]
+                        }
+                    })
+                    result.push({
+                        type: data.type,
+                        name: data.name,
+                        arrayTime: arrayTime,
+                        arrayPercentages: percentages,
+                        averageTime: timeSum / arrayTime.length,
+                        averagePercentage: percentageSum / arrayTime.length,
+                        count: count,
+                        subTable: false
+                    })
+                })
+                return result
+            },
+            getObjectModelData() {
+                let dataset = this.performance["objectModel"];
+                let result = []
+                dataset.forEach(data => {
+                    let arrayTime = []
+                    let percentages = {}
+                    let timeSum = 0
+                    let count = 0
+                    data.dataset.forEach(element => {
+                        count++
+                        if (this.checkTime(element["datetime"])) {
+                            arrayTime.push(element["timeLong"])
+                            timeSum += element["timeLong"]
+                            for (let key in element["percentage"]) {
+                                if (!percentages.hasOwnProperty(key))
+                                    percentages[key] = []
+                                percentages[key].push(element["percentage"][key])
+                            }
+                        }
+                    })
+                    let averagePercentageInEach = []
+                    let totalPercentage = []
+                    for (let key in percentages) {
+                        averagePercentageInEach.push({
+                            name: key,
+                            times: percentages[key].length,
+                            percentage: avg(percentages[key]),
+                            timeLong: timeSum / arrayTime.length
+                        })
+                        totalPercentage.push(avg(percentages[key]))
+                    }
+                    result.push({
+                        type: data.type,
+                        name: data.name,
+                        arrayTime: arrayTime,
+                        arrayPercentages: percentages,
+                        averageTime: timeSum / arrayTime.length,
+                        averagePercentage: avg(totalPercentage),
+                        data: averagePercentageInEach,
+                        count: count,
+                        subTable: false
+                    })
+                })
+                return result
+            },
+            changeListInfoGroupsStyle() {
+                let target = document.getElementById("infoTarget")
+                this.listInfoGroupsStyle = "max-height:" +
+                    (window.innerHeight - target.getBoundingClientRect().top - 100) + "px;" +
+                    " overflow-y: auto;"
+            },
+            checkTime(timeStr) {
+                let time = new Date(timeStr);
+                return Date.now() - time < this.limitTime * 1000;
+            },
+            stopTask() {
+                this.socket.emit('StopTask')
+            },
+            startTask() {
+                this.startButtonEnabled = false;
+                if (this.continuousMode) {
+                    this.socket.emit('StartTask', {
+                        frequency: this.frequency,
+                        sanityTimes: this.sanityTimes,
+                        useStone: this.useStone,
+                        intervalTime: this.intervalTime,
+                        minStartMultiple: this.minStartMultiple,
+                        type: 'continuous'
+                    });
+                } else {
+                    this.socket.emit('StartTask', {
+                        frequency: this.frequency,
+                        sanityTimes: this.sanityTimes,
+                        useStone: this.useStone,
+                        type: 'single'
+                    });
+                }
+                this.stopButtonEnabled = true;
+            },
+            loadDevice() {
+                this.connectionButtonEnabled = false;
+                this.socket.emit('LoadDevice');
+            },
+            updateScreenInfo() {
+                this.socket.emit('UpdateScreenInfo');
+            },
+            onInformationUpdate(data) {
+                if (core.connectionError) {
+                    core.onNotification("Reconnection Successful");
+                    setInterval(function () {
+                        window.location.reload();
+                    }, 1000);
+                }
+                console.log(data);
+                if (data["DeviceName"] != null) {
+                    this.deviceName = data["DeviceName"].substring(0, 25);
+                    this.connectionButtonEnabled = false;
+                } else
+                    this.deviceName = "未连接"
+                if (data["Resolution"] != null) {
+                    this.resolution.width = data["Resolution"]["x"];
+                    this.resolution.height = data["Resolution"]["y"];
+                } else {
+                    this.resolution.width = -1;
+                    this.resolution.height = -1;
+                }
+                if (data["Screen"] != null)
+                    this.screen = data["Screen"];
+                else
+                    this.screen = "UNKNOWN"
+                if (data["Task"] != null)
+                    this.task = data["Task"];
+                else this.task = {}
+                if (data["TaskStatus"] != null)
+                    this.TaskStatus = data["TaskStatus"];
+                else this.TaskStatus = ""
+                if (data["TaskType"] != null)
+                    this.TaskType = data["TaskType"]
+                else this.TaskType = "UNKNOWN"
+                if (data["LevelInfo"] != null)
+                    this.levelInfo = data["LevelInfo"]
+                else this.levelInfo = {}
+                if (data["FightProgress"] != null)
+                    this.fightProgress = data["FightProgress"]
+                else this.fightProgress = null
+                if (data["TaskProgress"] != null)
+                    this.taskProgress = data["TaskProgress"]
+                else this.taskProgress = null
+
+                if (data["TaskBuffer"] != null) {
+                    while (this.taskBufferLock) {
+
+                    }
+                    this.taskBufferLock = true;
+                    if (this.continuousModeStr !== "false") {
+                        this.frequency = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["frequency"];
+                        this.sanityTimes = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["sanityTimes"];
+                        this.useStone = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["useStone"];
+                        this.intervalTime = data["TaskBuffer"]["continuousTask"]["intervalTime"];
+                        this.minStartMultiple = data["TaskBuffer"]["continuousTask"]["minStartMultiple"];
+                    } else {
+                        this.frequency = data["TaskBuffer"]["singleTask"]["frequency"];
+                        this.sanityTimes = data["TaskBuffer"]["singleTask"]["sanityTimes"];
+                        this.useStone = data["TaskBuffer"]["singleTask"]["useStone"];
+                    }
+                    this.taskBufferLock = false;
+                }
+
+                if (this.TaskStatus !== "UNKNOWN" && this.TaskStatus !== "" && this.TaskStatus !== "Stopped" && this.TaskStatus !== "False") {
+                    this.stopButtonEnabled = true;
+                    this.startButtonEnabled = false;
+                } else {
+                    this.stopButtonEnabled = false;
+                    this.startButtonEnabled = true;
+                }
+
+                if (data["Performance"] != null) {
+                    this.performance = {classifyModel: [], objectModel: [], ocrModel: []}
+                    let source = data["Performance"];
+
+                    source["listClassifyModel"].forEach(element => {
+                        if (this.disableFirstTimes)
+                            source["classifyModel"][element].shift()
+                        this.performance["classifyModel"].push({
+                            type: "classifyModel",
+                            name: element,
+                            dataset: source["classifyModel"][element]
+                        })
+                    })
+
+                    source["listObjectModel"].forEach(element => {
+                        if (this.disableFirstTimes)
+                            source["objectModel"][element].shift()
+                        this.performance["objectModel"].push({
+                            type: "objectModel",
+                            name: element,
+                            dataset: source["objectModel"][element]
+                        })
+                    })
+
+                    if (this.disableFirstTimes)
+                        source["ocrModel"].shift()
+                    this.performance["ocrModel"] = [{
+                        type: "ocrModel",
+                        name: "ocr",
+                        dataset: source["ocrModel"]
+                    }]
+                }
+                this.changeListInfoGroupsStyle()
+                // performance
+                // Task
+            },
+            onTaskEnd() {
+                this.$toast.open({
+                    message: "任务完成",
+                    type: 'info',
+                    duration: 20 * 1000
+                });
+                this.webNotification();
+            },
+            onNotification(message) {
+                let messageType = "success"
+                let arr = message.split("|");
+                if (arr.length > 2) {
+                    if (arr[1].indexOf("ERROR") != -1)
+                        messageType = "error"
+                    if (arr[1].indexOf("WARNING") != -1)
+                        messageType = "warning"
+                    if (arr[1].indexOf("INFO") != -1)
+                        messageType = "success"
+                    if (arr[1].indexOf("DEBUG") != -1)
+                        messageType = "info"
+                }
+                this.$toast.open({
+                    message: message,
+                    type: messageType,
+                });
+            },
+            randomString(e) {
+                e = e || 32;
+                var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678", a = t.length, n = "";
+                for (i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
+                return n
+            },
+            webNotification(content = "循环任务已完成") {
+                // 先检查浏览器是否支持
+                let title = "任务完成通知:"
+                let data = {
+                    dir: "auto",  //auto（自动）, ltr（从左到右）, or rtl（从右到左）
+                    lang: "zh",  //指定通知中所使用的语言。这个字符串必须在 BCP 47 language tag 文档中是有效的。
+                    tag: this.randomString(10),  //赋予通知一个ID，以便在必要的时候对通知进行刷新、替换或移除。
+                    icon: "/static/95185823_p0.png",  //提示时候的图标
+                    body: content
+                }
+                if (!("Notification" in window)) {
+                    alert("This browser does not support desktop notification");
+                } else if (Notification.permission === "granted") {
+                    // If it's okay let's create a notification
+                    var notification = new Notification(title, data)
+                }
+                // 否则我们需要向用户获取权限
+                else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission(function (permission) {
+                        // 如果用户同意，就可以向他们发送通知
+                        if (permission === "granted") {
+                            var notification = new Notification(title, data)
+                        }
+                    });
+                }
+            }
+        },
+        created() {
+            this.socket.emit("RequestInformationUpdate")
+            var core = this
+            window.core = core
+            setInterval(function () {
+                if (!core.disableUpdate) {
+                    this.socket.emit("RequestInformationUpdate")
+                }
+            }, 1500);
+            this.socket.on('InformationUpdate', this.onInformationUpdate);
+            this.socket.on('TaskEnd', this.onTaskEnd);
+            this.socket.on('Notification', this.onNotification);
+            this.socket.on('disconnect', function () {
+                core.connectionError = true
+                core.$toast.error("connection error:", {
+                    queue: true,
+                    duration: 9999999999999
+                })
+            });
+        },
+        mounted() {
+            this.$watch(
+                (vm) => [vm.frequency, vm.sanityTimes, vm.useStone, vm.intervalTime, vm.minStartMultiple],
+                (val) => {
+                    while (this.taskBufferLock) {
+
+                    }
+                    this.taskBufferLock = true
+                    this.socket.emit('ChangeTaskBuffer', {
+                        frequency: this.frequency,
+                        sanityTimes: this.sanityTimes,
+                        useStone: this.useStone,
+                        intervalTime: this.intervalTime,
+                        minStartMultiple: this.minStartMultiple,
+                        type: this.continuousMode ? "continuous" : "single"
+                    });
+                    this.taskBufferLock = false
+                },
+                {
+                    immediate: true,
+                    deep: true,
+                }
+            );
+        },
+        watch: {
+            limitInfo: {
+                handler(newVal) {
+                    this.onRangeValueChanged()
+                },
+                deep: true
+            },
+            continuousModeStr: {
+                handler(newVal) {
+                    if (this.continuousModeStr === "true")
+                        this.continuousMode = true
+                    else
+                        this.continuousMode = false
+                },
+            },
+            disableFirstTimes: {
+                handler(newVal) {
+                    this.socket.emit("RequestInformationUpdate")
+                }
+            }
+        }
+    };
+
+    const app = Vue.createApp(Counter);
+    app.use(VueToast.ToastPlugin, {
+        position: 'bottom-left',
+        duration: 10000
+    });
+    app.mount('#app');
+
+</script>
