@@ -1,0 +1,28 @@
+item {
+    name: 'Sanity'
+    id: 1
+}
+item {
+    name: 'Proxy'
+    id: 2
+}
+item {
+    name: 'MainStart'
+    id: 3
+}
+item {
+    name: 'Main.Bag'
+    id: 4
+}
+item {
+    name: 'Main.Building'
+    id: 5
+}
+item {
+    name: 'Main.Fight'
+    id: 6
+}
+item {
+    name: 'TeamStart'
+    id: 7
+}
