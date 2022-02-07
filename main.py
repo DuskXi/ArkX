@@ -1,5 +1,4 @@
 import json
-import os
 
 from Automation.distributor import Distributor
 from Performance import recoder
@@ -12,7 +11,6 @@ def fileRead(fileName, encoding='utf-8'):
 
 
 def main():
-    root = os.path.split(os.path.realpath(__file__))[0]
     modelConfig = json.loads(fileRead("config/model.json"))
     labelsName = json.loads(fileRead("config/labelsName.json"))
     config = json.loads(fileRead("config/config.json"))
