@@ -1,6 +1,7 @@
 # 明日方舟长草期清理智神器
 
 ### 这是一个经过深思熟虑和大量实验后准备开写的项目
+
  
 ---
 
@@ -18,23 +19,89 @@
 
 毕竟都在长草期了，大家估计也不在乎每天只对基建进行一次换班带来的损失了，理智能tm清掉已经不错了
 
+# 安装&使用
+
+---
+
+***该教程需要在Powershell中运行，请不要使用cmd，如果你使用的是conda，只允许执行pip命令时使用cmd***
+
+1. 创建一个目录，在该目录下执行: `git clone https://github.com/DuskXi/ArkX.git`
+2. 执行 `cd ArkX`
+3. 此处分两种情况，一种是懒得自己配置python环境的，直接去Release中下载配置好的python环境（过阵子就会发布），如果自己配置python环境，请跟随(4)开始的步骤
+4. 安装好python环境以及配置好环境变量, 3.7.x 以上即可
+5. 执行以下命令:
+
+```bash
+mkdir apiInstallTemp
+cd apiInstallTemp
+```
+
+6. 然后前往 *https://github.com/protocolbuffers/protobuf/releases* 下载最新版本的win-64的zip,
+   然后把压缩包中的bin目录中的protoc.exe复制到ArkX/apiInstallTemp目录下
+7. 继续执行以下命令:
+8. 安装pip软件包
+
+```bash
+pip install -r requirements.txt
+pip install lxml matplotlib pathlib
+```
+
+9. 拉取指定版本TensorFlow model
+
+```bash
+git clone https://github.com/tensorflow/models/tree/r1.13.0
+```
+
+10. 切换目录，执行protoc:
+
+```bash
+cd models/research
+../../protoc.exe object_detection/protos/*.proto --python_out=.
+Get-ChildItem object_detection/protos/*.proto | foreach {../../protoc.exe "object_detection/protos/$($_.Name)" --python_out=.}
+```
+
+11. 安装object_detection_api:
+
+```bash
+pip install .
+```
+
+12. 安装pycocotools:
+
+```bash
+pip install git+https://github.com/philferriere/cocoapi.git#subdirectory=PythonAPI
+```
+
+13. 从这步开始，自行安装环境和直接下载环境的开始合并
+14. 安装完成后，在ArkX目录下执行以下命令(如果是直接从Release中下载的python环境，则需要在python前面加上路径，或者自行设置环境变量):
+
+```bash
+python main.py
+```
+
 # 功能进度
 
 ---
 
 ## 已经实现的功能(核心功能)
 
-1. - [X] 对游戏界面进行判断(实验结论为使用自定义网络的Tensorflow的图像分类模型)
+1.
+    - [X] 对游戏界面进行判断(实验结论为使用自定义网络的Tensorflow的图像分类模型)
 
-2. - [X] 从图像中获取各类按钮的坐标(实验结论为使用基于Tensorflow的ObjectDetectionAPI库)
+2.
+    - [X] 从图像中获取各类按钮的坐标(实验结论为使用基于Tensorflow的ObjectDetectionAPI库)
 
-3. - [X] 识别文字(实验结论为使用同样基于Tensorflow的PaddleOCR)
+3.
+    - [X] 识别文字(实验结论为使用同样基于Tensorflow的PaddleOCR)
 
-4. - [X] 利用adb获取串流(经过实验后结论为使用 scrcpy)
+4.
+    - [X] 利用adb获取串流(经过实验后结论为使用 scrcpy)
 
-5. - [X] 利用adb实现点击(也使用scrcpy)
+5.
+    - [X] 利用adb实现点击(也使用scrcpy)
 
-6. - [X] 用于清理智的操作逻辑程序
+6.
+    - [X] 用于清理智的操作逻辑程序
 
 ## 其他重要功能
 
