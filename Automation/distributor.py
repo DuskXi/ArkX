@@ -8,7 +8,7 @@ from .task import *
 
 # noinspection PyTypeChecker
 class Distributor:
-    def __init__(self, modelConfig, adb_path, labelsName, taskBufferPath="./taskBuffer.json"):
+    def __init__(self, modelConfig, adb_path, labelsName, taskBufferPath="./config/taskBuffer.json"):
         self.modelConfig = modelConfig
         self.taskBufferPath = taskBufferPath
         self.taskBuffer = TaskBuffer()
