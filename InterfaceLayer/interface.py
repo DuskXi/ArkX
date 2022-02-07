@@ -26,8 +26,8 @@ class Interface:
     def setConfig(**kwargs):
         if kwargs.get("GPULimit", None) is not None:
             networklayer.set_force_use_cpu()
-        if kwargs.get("GPULimit", 0) > 0:
-            networklayer.set_gpu_memory(memory=kwargs.get("GPULimit", 0))
+        if kwargs.get("Memory", 0) > 0:
+            networklayer.set_gpu_memory(memory=kwargs.get("Memory", 0))
         if kwargs.get("dynamicMemory", False):
             networklayer.set_dynamic_gpu_memory_usage()
 
