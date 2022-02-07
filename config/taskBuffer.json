@@ -1,0 +1,1 @@
+{"singleTask": {"frequency": 3, "sanityTimes": 0, "useStone": false}, "continuousTask": {"intervalTime": 180, "minStartMultiple": 1, "inlineSingleTask": {"frequency": 3, "sanityTimes": 0, "useStone": false}}}
