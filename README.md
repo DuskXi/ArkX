@@ -32,6 +32,8 @@
 5. 执行以下命令:
 
 ```bash
+pip install -r requirements.txt
+pip install lxml matplotlib pathlib PaddlePaddle
 mkdir apiInstallTemp
 cd apiInstallTemp
 ```
@@ -39,17 +41,10 @@ cd apiInstallTemp
 6. 然后前往 *https://github.com/protocolbuffers/protobuf/releases* 下载最新版本的win-64的zip,
    然后把压缩包中的bin目录中的protoc.exe复制到ArkX/apiInstallTemp目录下
 7. 继续执行以下命令:
-8. 安装pip软件包
+8. 拉取指定版本TensorFlow model
 
 ```bash
-pip install -r requirements.txt
-pip install lxml matplotlib pathlib
-```
-
-9. 拉取指定版本TensorFlow model
-
-```bash
-git clone https://github.com/tensorflow/models/tree/r1.13.0
+git clone -b v1.13.0 https://github.com/tensorflow/models.git
 ```
 
 10. 切换目录，执行protoc:
@@ -71,9 +66,15 @@ pip install .
 ```bash
 pip install git+https://github.com/philferriere/cocoapi.git#subdirectory=PythonAPI
 ```
+13. 修改部分import, 在目录`Lib\site-packages\object_detection\utils`中修改以下文件中的`import tensorflow as tf` 为 `import tensorflow.compat.v1 as tf`
+```
+label_map_util.py
+ops.py
+visualization_utils.py
+```
 
-13. 从这步开始，自行安装环境和直接下载环境的开始合并
-14. 安装完成后，在ArkX目录下执行以下命令(如果是直接从Release中下载的python环境，则需要在python前面加上路径，或者自行设置环境变量):
+15. 从这步开始，自行安装环境和直接下载环境的开始合并
+16. 安装完成后，在ArkX目录下执行以下命令(如果是直接从Release中下载的python环境，则需要在python前面加上路径，或者自行设置环境变量):
 
 ```bash
 python main.py
