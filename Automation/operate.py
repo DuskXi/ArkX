@@ -72,7 +72,7 @@ class Operate:
         return result
 
     def getSanity(self):
-        box = self._getBoxByName(self.objectModel.name, self.labelsName.IQ)
+        box = self._getBoxByName(self.objectModel.name, self.labelsName.Sanity)
         if box is None:
             return "N/A"
         resolution = self.interface.getResolution()
@@ -155,5 +155,5 @@ class DictObject:
 
 class LabelsName:
     def __init__(self, **entries):
-        self.IQ = None
+        self.Sanity = None
         self.__dict__.update(entries)
