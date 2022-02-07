@@ -102,7 +102,7 @@ class AndroidViewer(ControlMixin):
             sleep(2)
         except FileNotFoundError:
             raise FileNotFoundError(
-                "Couldn't find ADB at path ADB_bin: " + str(self.adb_path))
+                "Couldn't find ADB or jar at path ADB_bin: " + str(self.adb_path))
 
         return True
 
