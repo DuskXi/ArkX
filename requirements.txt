@@ -1,0 +1,10 @@
+loguru==0.5.1
+pytz==2021.1
+paddleocr==1.0.1
+Flask_SocketIO==5.1.1
+numpy==1.19.0
+Flask==1.1.2
+tensorflow==2.1.0
+av==8.1.0
+opencv_python==4.5.5.62
+Pillow==9.0.1
