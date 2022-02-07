@@ -1,0 +1,34 @@
+{
+  "objectDetectionModel": {
+    "modelName": "mainModel",
+    "filePath": "model/ODModel/main/output_inference_graph_v1.pb",
+    "pbtxt": "model/ODModel/main/label_map.pbtxt"
+  },
+  "addSanityModel": {
+    "modelName": "sanityModel",
+    "filePath": "model/ODModel/addSanity/output_inference_graph_v1.pb",
+    "pbtxt": "model/ODModel/addSanity/label_map.pbtxt"
+  },
+  "imageClassificationModel": {
+    "modelName": "icModel",
+    "filePath": "model/ICModel/icModel.h5",
+    "labels": [
+      "AddSanity",
+      "LevelList",
+      "LevelPrepare",
+      "Main",
+      "Team",
+      "Working",
+      "Ending",
+      "Root.Main",
+      "Root.Resources",
+      "Root.Chip"
+    ]
+  },
+  "ocrModel": {
+    "det": "./model/ocr/ch_ppocr_mobile_v1.1_det_train",
+    "cls": "./model/ocr/ch_ppocr_mobile_v1.1_cls_train",
+    "rec": "./model/ocr/ch_ppocr_mobile_v1.1_rec_pre"
+  },
+  "proxyName": "Proxy"
+}
