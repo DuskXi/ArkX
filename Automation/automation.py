@@ -8,9 +8,8 @@ from Performance import recoder
 
 
 class Automation:
-    def __init__(self, modelConfig, adb_path, labelsName, task):
-        self.operate = Operate(modelConfig, adb_path, labelsName)
-        self.operate.initModel()
+    def __init__(self, operate: Operate, labelsName, task):
+        self.operate = operate
         self.screen = ""
         self.isRun = True
         self.labelsName = LabelsName(**labelsName)
@@ -26,8 +25,8 @@ class Automation:
         self.abort = False
         self.inited = False
 
-    def loadGame(self):
-        self.operate.loadGame()
+    def loadGame(self, device_name=None):
+        self.operate.loadGame(device_name=device_name)
         self.operate.waitForGame()
         self.inited = True
 
