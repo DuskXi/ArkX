@@ -23,11 +23,20 @@ class Distributor:
         self.taskEndCallback = None
         self.taskType = "UNKNOWN"
         self.taskRecord = None
+        # 初始化状态
+        self.initIng = False
+        self.neuralNetworksInited = False
 
     def initDevice(self, device_name=None):
+        self.initIng = True
         automation = Automation(self.operate, self.labelsName, None)
         automation.loadGame(device_name=device_name)
         self.automation = automation
+        self.initIng = False
+
+    def initNeuralNetworks(self):
+        self.operate.initModel()
+        self.neuralNetworksInited = True
 
     def newSingleTask(self, frequency, sanityTimes: int = 0, useStone: bool = False):
         task = Task(frequency, sanityTimes, useStone)
@@ -84,6 +93,9 @@ class Distributor:
     def saveTaskConfig(self):
         self.taskBuffer.save(self.taskBufferPath)
 
+    def disconnectDevice(self):
+        self.automation.operate.releaseDevices()
+
     def getInformation(self):
         return {
             "Performance": recoder.Recoder.getDataset(),
@@ -91,13 +103,16 @@ class Distributor:
             "Screen": self.automation.screen if self.automation is not None else None,
             "Resolution": self.automation.operate.getResolution() if self.automation is not None else None,
             "DeviceName": self.automation.operate.getDeviceName() if self.automation is not None else None,
+            "NeuralNetworksStatus": self.neuralNetworksInited,
             "ContinuousTask": self.continuousTask.status if self.continuousTask is not None else None,
             "TaskType": self.taskType,
             "TaskStatus": self.taskType if self.taskType == "UNKNOWN" else (str(self.automation.isRun) if self.taskType == "Single" else self.continuousTask.status),
             "LevelInfo": self.automation.getScreenInfo() if self.automation is not None else None,
             "FightProgress": self.automation.progress if self.automation is not None else None,
             "TaskProgress": [self.automation.task.frequency, self.taskRecord.frequency] if self.taskRecord is not None and self.automation is not None else None,
-            "TaskBuffer": self.taskBuffer.getAsDict() if self.taskBuffer is not None else None
+            "TaskBuffer": self.taskBuffer.getAsDict() if self.taskBuffer is not None else None,
+            "ADBStatus": {"Status": "connecting", "Device": ""} if self.initIng else (
+                self.automation.operate.getDevicesConnectionStatus() if self.automation is not None else {"Status": "disconnected", "Device": ""}),
         }
 
 
