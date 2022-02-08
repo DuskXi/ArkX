@@ -3,12 +3,14 @@ import os
 import threading
 
 from Performance import recoder
+from .operate import Operate
 from .task import *
 
 
 # noinspection PyTypeChecker
 class Distributor:
     def __init__(self, modelConfig, adb_path, labelsName, taskBufferPath="./config/taskBuffer.json"):
+        self.operate = Operate(modelConfig, adb_path, labelsName)
         self.modelConfig = modelConfig
         self.taskBufferPath = taskBufferPath
         self.taskBuffer = TaskBuffer()
@@ -22,9 +24,9 @@ class Distributor:
         self.taskType = "UNKNOWN"
         self.taskRecord = None
 
-    def initDevice(self):
-        automation = Automation(self.modelConfig, self.adb_path, self.labelsName, None)
-        automation.loadGame()
+    def initDevice(self, device_name=None):
+        automation = Automation(self.operate, self.labelsName, None)
+        automation.loadGame(device_name=device_name)
         self.automation = automation
 
     def newSingleTask(self, frequency, sanityTimes: int = 0, useStone: bool = False):
