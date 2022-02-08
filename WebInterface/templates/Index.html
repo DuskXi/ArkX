@@ -70,7 +70,10 @@
                         <a class="nav-link active" aria-current="page" href="#">Index</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/list">List</a>
+                        <a class="nav-link" href="#" @click="onDeviceChoicesShow">设备</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">设置</a>
                     </li>
                 </ul>
                 <form class="d-flex">
@@ -78,6 +81,65 @@
             </div>
         </div>
     </nav>
+    <!-- Modal -->
+    <div class="modal fade" id="deviceChoices" data-bs-backdrop="static" tabindex="-1"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">设备管理</h5>
+                    <button type="button" class="btn-close" @click="onDeviceChoicesHide"></button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-light" type="button" @click="refreshDevices">
+                        <span :class="deviceRefreshLoading ? 'spinner-border spinner-border-sm' : ''" role="status"
+                              aria-hidden="true"></span>
+                        {{deviceRefreshLoading ? '刷新中...' : '刷新'}}
+                    </button>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">设备名</th>
+                            <th scope="col">状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="device in devices"
+                            :class="(device.name == deviceChoice && connectionStatus)? 'table-success':''">
+                            <td>{{device.name + ((device.name == deviceChoice && connectionStatus)? " (已连接)":"")}}</td>
+                            <td>{{device.state == 'device' ? '在线': '离线'}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="inputGroupSelect01">选择设备</label>
+                        <select class="form-select" v-model="deviceChoice" :disabled="connectionStatus">
+                            <option v-for="device in devices">{{device.name}}</option>
+                        </select>
+                    </div>
+
+                    <div class="btn-group" role="group" aria-label="">
+                        <button type="button" class="btn btn-success"
+                                @click="connectToDevice" :disabled="connectionStatus || connecting">
+                            {{connectionStatus? "已":""}}{{connecting? "正在":""}}连接到设备{{ deviceChoice==""? "":":"+
+                            deviceChoice }}
+                        </button>
+
+                        <button type="button" class="btn btn-danger"
+                                @click="disconnectDevice" :disabled="!connectionStatus">
+                            断开连接
+                        </button>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="onDeviceChoicesHide">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div class="row justify-content-md-center" style="margin-top: 20px">
             <div class="col col-lg-4">
@@ -114,25 +176,33 @@
                     <input type="text" class="form-control" placeholder="1"
                            v-model="minStartMultiple">
                 </div>
+
                 <div class="btn-group" role="group" aria-label="">
-                    <button type="button" class="btn btn-primary" @click="loadDevice"
-                            :disabled="!connectionButtonEnabled">
-                        加载设备
-                    </button>
-                    <button type="button" class="btn btn-success" @click="startTask" :disabled="!startButtonEnabled">
+                    <button type="button" class="btn btn-success" @click="startTask"
+                            :disabled="!(startButtonEnabled && neuralNetworksStatus && connectionStatus)">
                         开始任务
                     </button>
                     <button type="button" class="btn btn-danger" @click="stopTask" :disabled="!stopButtonEnabled">
                         中断任务
                     </button>
                     <button type="button" class="btn btn-light" @click="updateScreenInfo"
-                            :disabled="!(startButtonEnabled && !connectionButtonEnabled)">
-                        界面信息提取
+                            :disabled="!(startButtonEnabled && neuralNetworksStatus && connectionStatus)">
+                        刷新
                     </button>
                 </div>
+                <div class="btn-group" style="margin-top:10px;" role="group" aria-label="">
+                    <button type="button" class="btn btn-primary" @click="initNeuralNetworks"
+                            :disabled="!(initButtonEnabled && !neuralNetworksStatus)">
+                        初始化神经网络
+                    </button>
+                    <button type="button" class="btn btn-light" @click="onDeviceChoicesShow">
+                        管理设备
+                    </button>
+                </div>
+
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" v-model="disableUpdate">
-                    <label class="form-check-label">关闭信息更新</label>
+                    <label class="form-check-label">关闭信息更新(开发选项, 不要乱勾选)</label>
                 </div>
             </div>
             <div class="col col-lg-8" id="infoTarget" :style="listInfoGroupsStyle">
@@ -207,7 +277,8 @@
                     </tr>
                     </tbody>
                 </table>
-                <h4> 当前战斗进度 ({{ fightProgress == null ? "" : fightProgress[0] + "/" + fightProgress[1] }})</h4>
+                <h4> 当前战斗进度 {{ fightProgress == null ? "" : "(" + fightProgress[0] + "/" + fightProgress[1] +
+                    ")"}} </h4>
                 <div class="progress">
                     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                          :style="'width: '+ (fightProgress == null ? 0 : ((fightProgress[0]/fightProgress[1])*100).toFixed(2)) +'%'">
@@ -274,6 +345,7 @@
                 </table>
             </div>
         </div>
+
     </div>
 
 </div>
@@ -332,7 +404,8 @@
                     currentId: 2
                 },
                 levelInfo: {},
-                connectionButtonEnabled: true,
+                initButtonEnabled: true,
+                neuralNetworksStatus: false,
                 startButtonEnabled: true,
                 stopButtonEnabled: false,
                 continuousMode: false,
@@ -344,6 +417,12 @@
                 listInfoGroupsStyle: {},
                 taskProgress: {},
                 taskBufferLock: false,
+                // adb设备相关
+                deviceRefreshLoading: false,
+                devices: [],
+                deviceChoice: "",
+                connectionStatus: false,
+                connecting: false,
             }
         },
         methods: {
@@ -470,13 +549,54 @@
                 }
                 this.stopButtonEnabled = true;
             },
-            loadDevice() {
-                this.connectionButtonEnabled = false;
-                this.socket.emit('LoadDevice');
+            initNeuralNetworks() {
+                this.initButtonEnabled = false;
+                this.socket.emit('InitNeuralNetworks');
             },
             updateScreenInfo() {
                 this.socket.emit('UpdateScreenInfo');
             },
+            // adb设备相关
+            onDeviceChoicesShow() {
+                this.refreshDevices();
+                $("#deviceChoices").modal("show");
+                $('#deviceChoices').data('bs.modal')._config.backdrop = "static"
+            },
+            onDeviceChoicesHide() {
+                $("#deviceChoices").modal("hide");
+            },
+            refreshDevices() {
+                this.deviceRefreshLoading = true;
+                this.socket.emit('RequestDevicesInformation');
+            },
+            onDeviceInformationUpdate(data) {
+                this.devices = [];
+                for (let key in data) {
+                    this.devices.push({"name": key, "state": data[key]});
+                }
+                this.deviceRefreshLoading = false;
+            },
+            connectToDevice() {
+                if (this.deviceChoice === "") {
+                    this.$toast.open({
+                        message: "未选择设备, 请先选择设备再连接",
+                        type: "warning",
+                    });
+                } else {
+                    this.socket.emit('ConnectToDevice', {device: this.deviceChoice});
+                    this.connecting = true;
+                }
+            },
+            disconnectDevice() {
+                if (this.stopButtonEnabled) {
+                    this.$toast.open({
+                        message: "危险操作, 禁止在任务执行期间断开设备",
+                        type: "error",
+                    });
+                } else
+                    this.socket.emit('DisconnectDevice');
+            },
+            // 信息更新相关
             onInformationUpdate(data) {
                 if (core.connectionError) {
                     core.onNotification("Reconnection Successful");
@@ -487,7 +607,6 @@
                 console.log(data);
                 if (data["DeviceName"] != null) {
                     this.deviceName = data["DeviceName"].substring(0, 25);
-                    this.connectionButtonEnabled = false;
                 } else
                     this.deviceName = "未连接"
                 if (data["Resolution"] != null) {
@@ -519,6 +638,12 @@
                 if (data["TaskProgress"] != null)
                     this.taskProgress = data["TaskProgress"]
                 else this.taskProgress = null
+
+                this.neuralNetworksStatus = data["NeuralNetworksStatus"];
+                this.connectionStatus = data["ADBStatus"]["Status"] === "connected";
+                this.connecting = data["ADBStatus"]["Status"] === "connecting";
+                if (this.connectionStatus)
+                    this.deviceChoice = data["ADBStatus"]["Device"];
 
                 if (data["TaskBuffer"] != null) {
                     while (this.taskBufferLock) {
@@ -583,6 +708,7 @@
                 // performance
                 // Task
             },
+            // 提示
             onTaskEnd() {
                 this.$toast.open({
                     message: "任务完成",
@@ -661,6 +787,7 @@
                     duration: 9999999999999
                 })
             });
+            this.socket.on('DevicesInformation', this.onDeviceInformationUpdate);
         },
         mounted() {
             this.$watch(

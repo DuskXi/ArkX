@@ -14,10 +14,12 @@ class Device:
     isRead = None
 
     def __init__(self, adb_path, device_name=None):
+        self.device_name = ""
         if adb_path != "-1":
             logger.info("initialize AndroidViewer")
             if device_name is not None:
                 self.android = AndroidViewer(adb_path=adb_path, bitrate=5632000, multipleDevices=True, deviceADBName=device_name)
+                self.device_name = device_name
             else:
                 self.android = AndroidViewer(adb_path=adb_path, bitrate=5632000)
             self.isRun = True

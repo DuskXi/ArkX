@@ -24,7 +24,7 @@ class Operate:
         self.adb_path = adb_path
         self.proxyName = modelConfig["proxyName"]
         self.labelsName = LabelsName(**labelsName)
-        self.interface.setConfig(GPULimit=True)
+        self.interface.setConfig(dynamicMemory=True)
         self.deviceManager = DeviceManager(adb_path)
 
     def initModel(self):
@@ -33,21 +33,34 @@ class Operate:
         self.interface.loadImageClassificationModel(self.classifyModel.name, self.classifyModel.path, self.classifyModel.labels)
         self.interface.loadOcr(self.ocrModel.det, self.ocrModel.cls, self.ocrModel.rec)
 
-    def loadGame(self, device_name=None):
+    def loadDevices(self, device_name=None):
         self.interface.loadAndroid(self.adb_path, device_name=device_name)
 
-    def releaseGame(self):
+    def releaseDevices(self):
         self.interface.releaseAndroid()
 
-    def waitForGame(self):
+    def waitForDevices(self):
         self.interface.waitScreen()
+
+    def getDevicesConnectionStatus(self):
+        result = {"Status": "disconnected", "Device": ""}
+        if self.interface.device is None:
+            result["Status"] = "disconnected"
+        else:
+            if self.interface.device.isRun:
+                result["Status"] = "connected"
+                result["Device"] = self.interface.device.device_name
+            else:
+                result["Status"] = "disconnected"
+                result["Device"] = self.interface.device.device_name
+        return result
+
+    def getDevicesInfo(self):
+        return self.deviceManager.getADBDevices()
 
     def getGameStatus(self):
         result = self.interface.getClassification(self.classifyModel.name)
         return result[0]
-
-    def getDevicesInfo(self):
-        return self.deviceManager.getADBDevices()
 
     def _getObjectData(self, modelName):
         result = self.interface.detectObjectAndGetBox(modelName)
