@@ -68,9 +68,25 @@ def stopTask():
     distributor.stopTask()
 
 
+@socketio.on('InitNeuralNetworks')
+def initNeuralNetworks():
+    distributor.initNeuralNetworks()
+
+
 @socketio.on('LoadDevice')
 def loadDevice():
     distributor.initDevice()
+
+
+@socketio.on('ConnectToDevice')
+def connectToDevice(data):
+    device = data['device']
+    distributor.initDevice(device)
+
+
+@socketio.on('DisconnectDevice')
+def disconnectDevice():
+    distributor.disconnectDevice()
 
 
 @socketio.on('UpdateScreenInfo')
@@ -81,6 +97,16 @@ def updateScreenInfo():
 @socketio.on('RequestInformationUpdate')
 def requestInformationUpdate():
     updateInformation(distributor.getInformation())
+
+
+@socketio.on('RequestSystemInformation')
+def requestSystemInformation():
+    socketio.emit("SystemInformation", systemInformation())
+
+
+@socketio.on('RequestDevicesInformation')
+def requestDevicesInformation():
+    socketio.emit("DevicesInformation", devicesInformation())
 
 
 def updateInformation(data):
@@ -94,6 +120,19 @@ def notification(message):
 def eventTaskEnd():
     socketio.emit("TaskEnd")
     updateInformation(distributor.getInformation())
+
+
+def systemInformation():
+    result = {}
+    return result
+
+
+def devicesInformation():
+    result = {}
+    data = distributor.operate.getDevicesInfo()
+    for device in data:
+        result[device[0]] = device[1]
+    return result
 
 
 @app.route("/")
