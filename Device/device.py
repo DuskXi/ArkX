@@ -1,6 +1,8 @@
+import re
 from time import sleep
 
 from loguru import logger
+import subprocess
 
 from .viewer import AndroidViewer
 
@@ -11,10 +13,13 @@ class Device:
     latestScreen = None
     isRead = None
 
-    def __init__(self, adb_path):
+    def __init__(self, adb_path, device_name=None):
         if adb_path != "-1":
             logger.info("initialize AndroidViewer")
-            self.android = AndroidViewer(adb_path=adb_path, bitrate=5632000)
+            if device_name is not None:
+                self.android = AndroidViewer(adb_path=adb_path, bitrate=5632000, multipleDevices=True, deviceADBName=device_name)
+            else:
+                self.android = AndroidViewer(adb_path=adb_path, bitrate=5632000)
             self.isRun = True
         else:
             logger.warning("initialize AndroidViewer Test Mode")
@@ -54,3 +59,28 @@ class Device:
 
     def getDeviceName(self):
         return self.android.device_name
+
+
+class DeviceManager:
+    def __init__(self, adb_path):
+        self.adb_path = adb_path
+
+    def getADBDevices(self):
+        devices = []
+
+        adb = subprocess.Popen([self.adb_path, 'devices'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        adb.wait()
+        result, error = adb.communicate()
+        startLineFound = False
+        for line in result.splitlines():
+            content = line.decode('utf-8')
+            if content.startswith('List of devices attached'):
+                startLineFound = True
+                continue
+            if startLineFound:
+                if re.search(r'[0-9a-z:\.]+\s(device|offline)', content):
+                    device = re.search(r'^[0-9a-z:\.]+', content)[0]
+                    status = re.search(r'(device|offline)', content)[0]
+                    devices.append([device, status])
+
+        return devices
