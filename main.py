@@ -21,7 +21,7 @@ def main():
                                 [modelConfig["imageClassificationModel"]["modelName"]])
 
     distributor = Distributor(modelConfig, config["adb_path"], labelsName)
-    web.run(distributor)
+    web.run(distributor, config)
 
 
 if __name__ == "__main__":
