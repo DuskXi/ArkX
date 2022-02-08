@@ -59,6 +59,9 @@ class Distributor:
                 deviceName = re.search(r"(?<=name:).+?(?=,)", sysInfo["GPU"][0]["description"])
                 deviceName = deviceName.group(0) if deviceName else "UNKNOWN Device"
                 logger.debug(f"GPU设备: {deviceName} 已启用")
+        else:
+            logger.info("初始化CPU设备...")
+            self.operate.interface.setConfig(GPULimit=True)
         self.operate.initModel()
         self.neuralNetworksInited = True
 
