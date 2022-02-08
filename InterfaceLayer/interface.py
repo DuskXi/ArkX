@@ -62,7 +62,8 @@ class Interface:
         logger.info("release Android")
         self.device.isRun = False
         time.sleep(1)
-        self.device.android.Dispose()
+        self.device.android.release()
+        self.device = None
 
     # 检测
     # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,13 +140,15 @@ class Interface:
     # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     def getResolution(self):
+        if self.device is None:
+            return {"x": -1, "y": - 1}
         if type(self.device.latestScreen) != np.ndarray:
             return {"x": -1, "y": - 1}
         else:
             return {"x": self.device.latestScreen.shape[1], "y": self.device.latestScreen.shape[0]}
 
     def getDeviceName(self):
-        return self.device.getDeviceName()
+        return self.device.getDeviceName() if self.device is not None else "UNKNOWN"
 
     # 点击
     def click(self, x, y):
