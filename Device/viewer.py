@@ -140,7 +140,7 @@ class AndroidViewer(ControlMixin):
 
         return result_frames or None
 
-    def Dispose(self):
+    def release(self):
         try:
             self.video_socket.shutdown(socket.SHUT_RDWR)
             self.control_socket.shutdown(socket.SHUT_RDWR)
