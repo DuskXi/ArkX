@@ -45,9 +45,9 @@ class Interface:
         logger.info("load classify model[ " + name + ":" + path + "]")
 
     # 加载手机控制器
-    def loadAndroid(self, adb_path: str):
+    def loadAndroid(self, adb_path: str, device_name=None):
         logger.info("loadAndroid adb_path: " + adb_path)
-        self.device = Device(adb_path)
+        self.device = Device(adb_path, device_name=device_name)
         threading.Thread(target=self.device.keepScreenRefresh, args=()).start()
 
     # 加载光学文字识别模型
