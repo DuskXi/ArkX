@@ -58,7 +58,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Navbar</a>
+            <a class="navbar-brand" href="#">ArkX</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
                         <a class="nav-link" href="#" @click="onDeviceChoicesShow">设备</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">设置</a>
+                        <a class="nav-link" href="#" @click="onSettingModalShow">设置</a>
                     </li>
                 </ul>
                 <form class="d-flex">
@@ -81,7 +81,7 @@
             </div>
         </div>
     </nav>
-    <!-- Modal -->
+    <!-- Device -->
     <div class="modal fade" id="deviceChoices" data-bs-backdrop="static" tabindex="-1"
          aria-labelledby="exampleModalLabel"
          aria-hidden="true">
@@ -136,6 +136,71 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @click="onDeviceChoicesHide">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Settings -->
+    <div class="modal fade" id="settingsModal" data-bs-backdrop="static" tabindex="-1"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">设置</h5>
+                    <button type="button" class="btn-close" @click="onSettingsModalHide"></button>
+                </div>
+                <div class="modal-body">
+                    <h3>CPU: </h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">名称</th>
+                            <th scope="col">内存上限</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="device in cpu">
+                            <td>{{device.name}}</td>
+                            <td>{{device.maxMemory}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <h3>GPU: </h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">名称</th>
+                            <th scope="col">内存上限</th>
+                            <th scope="col">描述</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="device in gpu">
+                            <td>{{device.name}}</td>
+                            <td>{{device.maxMemory}}</td>
+                            <td>{{device.description}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="form-check form-switch" v-if="gpu.length > 0">
+                        <input class="form-check-input" type="checkbox" role="switch" v-model="enableGPU">
+                        <label class="form-check-label">启用GPU</label>
+                    </div>
+                    <div class="form-check form-switch" v-if="gpu.length > 0" :disabled="!enableGPU">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               v-model="dynamicMemory" :disabled="!enableGPU">
+                        <label class="form-check-label">启用动态显存</label>
+                    </div>
+                    <h5 v-if="gpu.length > 0 " :disabled="!enableGPU">显存限制:
+                        {{dynamicMemory? "动态" :sizeToString(gpu[0].memoryValue * memoryLimitPercentage)}}</h5>
+                    <input type="range" class="form-range" min="0" max="1" step="0.01"
+                           v-if="gpu.length > 0" v-model="memoryLimitPercentage"
+                           :disabled="dynamicMemory || !enableGPU">
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="onSettingsModalHide">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -423,6 +488,13 @@
                 deviceChoice: "",
                 connectionStatus: false,
                 connecting: false,
+                // 系统设备:
+                cpu: [],
+                gpu: [],
+                enableGPU: false,
+                memoryLimitPercentage: 0.3,
+                dynamicMemory: false,
+                gpuDataUpdating: false,
             }
         },
         methods: {
@@ -596,6 +668,24 @@
                 } else
                     this.socket.emit('DisconnectDevice');
             },
+            // 设置相关
+            onSettingModalShow() {
+                this.socket.emit('RequestSystemInformation');
+                $("#settingsModal").modal("show");
+                $('#settingsModal').data('bs.modal')._config.backdrop = "static"
+            },
+            onSettingsModalHide() {
+                $("#settingsModal").modal("hide");
+            },
+            onSystemInformationUpdate(data) {
+                this.gpuDataUpdating = true;
+                this.cpu = data['CPU'];
+                this.gpu = data['GPU'];
+                this.enableGPU = data['enableGPU'];
+                this.dynamicMemory = data['dynamicMemory'];
+                this.memoryLimitPercentage = data['gpuMemoryLimit'];
+                this.gpuDataUpdating = false;
+            },
             // 信息更新相关
             onInformationUpdate(data) {
                 if (core.connectionError) {
@@ -735,12 +825,6 @@
                     type: messageType,
                 });
             },
-            randomString(e) {
-                e = e || 32;
-                var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678", a = t.length, n = "";
-                for (i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
-                return n
-            },
             webNotification(content = "循环任务已完成") {
                 // 先检查浏览器是否支持
                 let title = "任务完成通知:"
@@ -766,6 +850,23 @@
                         }
                     });
                 }
+            },
+            // 工具类
+            randomString(e) {
+                e = e || 32;
+                var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678", a = t.length, n = "";
+                for (i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
+                return n
+            },
+            sizeToString(size) {
+                if (size < 1024)
+                    return size + "B"
+                else if (size < 1024 * 1024)
+                    return (size / 1024).toFixed(2) + "KB"
+                else if (size < 1024 * 1024 * 1024)
+                    return (size / 1024 / 1024).toFixed(2) + "MB"
+                else
+                    return (size / 1024 / 1024 / 1024).toFixed(2) + "GB"
             }
         },
         created() {
@@ -788,6 +889,7 @@
                 })
             });
             this.socket.on('DevicesInformation', this.onDeviceInformationUpdate);
+            this.socket.on('SystemInformation', this.onSystemInformationUpdate);
         },
         mounted() {
             this.$watch(
@@ -806,6 +908,21 @@
                         type: this.continuousMode ? "continuous" : "single"
                     });
                     this.taskBufferLock = false
+                },
+                {
+                    immediate: true,
+                    deep: true,
+                }
+            );
+            this.$watch(
+                (vm) => [vm.enableGPU, vm.dynamicMemory, vm.memoryLimitPercentage],
+                (val) => {
+                    if (!this.gpuDataUpdating && $("#settingsModal").css('display') == 'block')
+                        this.socket.emit("ChangeGPUDeviceInfo", {
+                            enableGPU: val[0],
+                            dynamicMemory: val[1],
+                            gpuMemoryLimit: val[2]
+                        })
                 },
                 {
                     immediate: true,
@@ -832,7 +949,7 @@
                 handler(newVal) {
                     this.socket.emit("RequestInformationUpdate")
                 }
-            }
+            },
         }
     };
 

@@ -1,10 +1,12 @@
 import json
 import os
+import re
 import threading
 
 from Performance import recoder
 from .operate import Operate
 from .task import *
+from tensorflow.python.client import device_lib
 
 
 # noinspection PyTypeChecker
@@ -34,7 +36,29 @@ class Distributor:
         self.automation = automation
         self.initIng = False
 
-    def initNeuralNetworks(self):
+    def initNeuralNetworks(self, enableGPU=False, gpuMemoryLimit=None):
+        if enableGPU:
+            logger.info("已启用GPU加速模式")
+            logger.info("正在检查GPU设备")
+            sysInfo = self.getSystemInfo()
+            if len(sysInfo["GPU"]) < 1:
+                logger.error("未检测到GPU设备")
+                logger.error("请检是否安装了对应的CUDA和cuDNN驱动")
+                logger.error("无法启动GPU加速")
+                logger.warning("切换为CPU模式")
+                self.operate.interface.setConfig(GPULimit=True)
+            else:
+                if gpuMemoryLimit == "dynamic":
+                    self.operate.interface.setConfig(dynamicMemory=True)
+                    logger.info("GPU设置为动态显存")
+                else:
+                    gpuMemoryLimit *= sysInfo["GPU"][0]["memoryValue"] / 1024 / 1024
+                    gpuMemoryLimit = int(gpuMemoryLimit)
+                    self.operate.interface.setConfig(Memory=gpuMemoryLimit)
+                    logger.info("GPU显存被限制为{}MB".format(gpuMemoryLimit))
+                deviceName = re.search(r"(?<=name:).+?(?=,)", sysInfo["GPU"][0]["description"])
+                deviceName = deviceName.group(0) if deviceName else "UNKNOWN Device"
+                logger.debug(f"GPU设备: {deviceName} 已启用")
         self.operate.initModel()
         self.neuralNetworksInited = True
 
@@ -114,6 +138,28 @@ class Distributor:
             "ADBStatus": {"Status": "connecting", "Device": ""} if self.initIng else (
                 self.automation.operate.getDevicesConnectionStatus() if self.automation is not None else {"Status": "disconnected", "Device": ""}),
         }
+
+    def getSystemInfo(self):
+        results = {"CPU": [], "GPU": []}
+        devices = device_lib.list_local_devices()
+        for device in devices:
+            if device.device_type == "CPU":
+                results["CPU"].append({"name": device.name, "maxMemory": self.memoryToString(device.memory_limit), "memoryValue": float(device.memory_limit)})
+            elif device.device_type == "GPU":
+                results["GPU"].append(
+                    {"name": device.name, "maxMemory": self.memoryToString(device.memory_limit), "memoryValue": float(device.memory_limit), "description": device.physical_device_desc})
+        return results
+
+    @staticmethod
+    def memoryToString(memory: int):
+        if memory < 1024:
+            return str(memory) + "B"
+        elif memory < 1024 * 1024:
+            return str(round(memory / 1024, 2)) + "KB"
+        elif memory < 1024 * 1024 * 1024:
+            return str(round(memory / 1024 / 1024, 2)) + "MB"
+        else:
+            return str(round(memory / 1024 / 1024 / 1024, 2)) + "GB"
 
 
 class TaskBuffer:

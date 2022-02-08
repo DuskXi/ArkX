@@ -112,6 +112,8 @@ python main.py
 - [X] 反馈模型检测精准度
 - [ ] 降低CPU使用率
 - [X] 支持GPU
+- [X] 设置GPU显存限制
+- [X] GPU动态显存
 - [X] 多设备选择
 
 ---
@@ -119,7 +121,8 @@ python main.py
 ## 待实现
 
 - [ ] 提供adb设备操作界面
-- [ ] 显示系统信息(主要为GPU设备)
+- [X] 显示系统信息(主要为GPU设备)
+- [ ] 基于ffmpeg-python 对 H264解码进行GPU加速支持(cuvid,cuda,h264_amf,vaapi), 移除PyAV库
 
 ---
 

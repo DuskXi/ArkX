@@ -1,3 +1,4 @@
+import json
 import logging
 import sys
 import threading
@@ -14,6 +15,10 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 # noinspection PyTypeChecker
 distributor: Distributor = None
+enableGPU = False
+gpuMemoryLimit = 0
+dynamicMemory = False
+configDict = {}
 
 logging.getLogger('socketio').setLevel(logging.ERROR)
 logging.getLogger('engineio').setLevel(logging.ERROR)
@@ -23,6 +28,11 @@ logging.getLogger('werkzeug').setLevel(logging.ERROR)
 def fileRead(fileName, encoding="utf-8"):
     with open(fileName, encoding=encoding) as f:
         return f.read()
+
+
+def fileWrite(fileName, content, encoding="utf-8"):
+    with open(fileName, "w", encoding=encoding) as f:
+        f.write(content)
 
 
 @socketio.on('StartTask')
@@ -63,6 +73,21 @@ def changeTaskBuffer(data):
         distributor.saveTaskConfig()
 
 
+@socketio.on("ChangeGPUDeviceInfo")
+def changeGPUDeviceInfo(data):
+    global enableGPU
+    global gpuMemoryLimit
+    global dynamicMemory
+    global configDict
+    enableGPU = bool(data['enableGPU'])
+    gpuMemoryLimit = float(data['gpuMemoryLimit'])
+    dynamicMemory = bool(data['dynamicMemory'])
+    configDict['EnableGPU'] = enableGPU
+    configDict['GPUMemoryLimit'] = gpuMemoryLimit
+    configDict['DynamicMemory'] = dynamicMemory
+    fileWrite("config/config.json", json.dumps(configDict))
+
+
 @socketio.on('StopTask')
 def stopTask():
     distributor.stopTask()
@@ -70,7 +95,13 @@ def stopTask():
 
 @socketio.on('InitNeuralNetworks')
 def initNeuralNetworks():
-    distributor.initNeuralNetworks()
+    global enableGPU
+    global gpuMemoryLimit
+    global dynamicMemory
+    if enableGPU:
+        distributor.initNeuralNetworks(enableGPU, gpuMemoryLimit if not dynamicMemory else "dynamic")
+    else:
+        distributor.initNeuralNetworks()
 
 
 @socketio.on('LoadDevice')
@@ -123,7 +154,11 @@ def eventTaskEnd():
 
 
 def systemInformation():
-    result = {}
+    global enableGPU
+    global gpuMemoryLimit
+    global dynamicMemory
+    info = distributor.getSystemInfo()
+    result = {**info, "enableGPU": enableGPU, "gpuMemoryLimit": gpuMemoryLimit, "dynamicMemory": dynamicMemory}
     return result
 
 
@@ -142,8 +177,18 @@ def index():
     return fileRead("WebInterface/templates/index.html")
 
 
-def run(_distributor: Distributor):
+def run(_distributor: Distributor, config):
     global distributor
+    global enableGPU
+    global gpuMemoryLimit
+    global dynamicMemory
+    global configDict
+
+    enableGPU = config['EnableGPU']
+    gpuMemoryLimit = config['GPUMemoryLimit']
+    dynamicMemory = config['DynamicMemory']
+    configDict = config
+
     ws_handler = WSHandler()
     ws_handler.bindEvent(notification)
     logger.configure(handlers=[{"sink": ws_handler}, {"sink": sys.stdout}])

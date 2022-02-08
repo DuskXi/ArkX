@@ -24,7 +24,6 @@ class Operate:
         self.adb_path = adb_path
         self.proxyName = modelConfig["proxyName"]
         self.labelsName = LabelsName(**labelsName)
-        self.interface.setConfig(dynamicMemory=True)
         self.deviceManager = DeviceManager(adb_path)
 
     def initModel(self):
