@@ -3,6 +3,7 @@ import re
 from loguru import logger
 
 from InterfaceLayer.interface import Interface
+from Device.device import DeviceManager
 
 
 class Operate:
@@ -23,7 +24,8 @@ class Operate:
         self.adb_path = adb_path
         self.proxyName = modelConfig["proxyName"]
         self.labelsName = LabelsName(**labelsName)
-        self.interface.setConfig(dynamicMemory=True)
+        self.interface.setConfig(GPULimit=True)
+        self.deviceManager = DeviceManager(adb_path)
 
     def initModel(self):
         self.interface.loadObjectDetectionModel(self.objectModel.name, self.objectModel.path, self.objectModel.pbtxt)
@@ -31,8 +33,8 @@ class Operate:
         self.interface.loadImageClassificationModel(self.classifyModel.name, self.classifyModel.path, self.classifyModel.labels)
         self.interface.loadOcr(self.ocrModel.det, self.ocrModel.cls, self.ocrModel.rec)
 
-    def loadGame(self):
-        self.interface.loadAndroid(self.adb_path)
+    def loadGame(self, device_name=None):
+        self.interface.loadAndroid(self.adb_path, device_name=device_name)
 
     def releaseGame(self):
         self.interface.releaseAndroid()
@@ -43,6 +45,9 @@ class Operate:
     def getGameStatus(self):
         result = self.interface.getClassification(self.classifyModel.name)
         return result[0]
+
+    def getDevicesInfo(self):
+        return self.deviceManager.getADBDevices()
 
     def _getObjectData(self, modelName):
         result = self.interface.detectObjectAndGetBox(modelName)
