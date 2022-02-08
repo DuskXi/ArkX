@@ -26,12 +26,12 @@ class Automation:
         self.inited = False
 
     def loadGame(self, device_name=None):
-        self.operate.loadGame(device_name=device_name)
-        self.operate.waitForGame()
+        self.operate.loadDevices(device_name=device_name)
+        self.operate.waitForDevices()
         self.inited = True
 
     def releaseGame(self):
-        self.operate.releaseGame()
+        self.operate.releaseDevices()
 
     def updateScreen(self):
         screen = self.operate.getGameStatus()
