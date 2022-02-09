@@ -207,7 +207,9 @@ def run(_distributor: Distributor, config):
 
     ws_handler = WSHandler()
     ws_handler.bindEvent(notification)
-    logger.configure(handlers=[{"sink": ws_handler}, {"sink": sys.stdout}])
+    logFormat = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <level>{message}</level>"
+    logger.configure(handlers=[{"sink": ws_handler, "format": logFormat},
+                               {"sink": sys.stdout}])
     logger.add("log/log_{time}.log", rotation="500MB", encoding="utf-8", enqueue=True, compression="zip", retention="10 days")
     distributor = _distributor
     distributor.bindTaskEndCallback(eventTaskEnd)
