@@ -81,7 +81,7 @@ class Distributor:
         self.mainThread.start()
         self.taskType = "Single"
 
-        self.taskBuffer.taskType = "Single"
+        self.taskBuffer.taskType = "single"
         self.taskBuffer.singleTask.frequency = frequency
         self.taskBuffer.singleTask.sanityTimes = sanityTimes
         self.taskBuffer.singleTask.useStone = useStone
@@ -96,7 +96,7 @@ class Distributor:
         self.mainThread.start()
         self.taskType = "Continuous"
 
-        self.taskBuffer.taskType = "ContinuousTask"
+        self.taskBuffer.taskType = "continuousTask"
         self.taskBuffer.continuousTask.intervalTime = int(intervalTime / 60)
         self.taskBuffer.continuousTask.inlineSingleTask.frequency = frequency
         self.taskBuffer.continuousTask.inlineSingleTask.sanityTimes = sanityTimes
