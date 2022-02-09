@@ -1,8 +1,8 @@
+import os
+
 import json
 
-from Automation.distributor import Distributor
-from Performance import recoder
-from WebInterface import web
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def fileRead(fileName, encoding='utf-8'):
@@ -11,6 +11,10 @@ def fileRead(fileName, encoding='utf-8'):
 
 
 def main():
+    from Automation.distributor import Distributor
+    from Performance import recoder
+    from WebInterface import web
+
     modelConfig = json.loads(fileRead("config/model.json"))
     labelsName = json.loads(fileRead("config/labelsName.json"))
     config = json.loads(fileRead("config/config.json"))
