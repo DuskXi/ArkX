@@ -214,33 +214,42 @@
                 <div class="input-group mb-3">
                     <label class="input-group-text" for="inputGroupSelect01">任务类型</label>
                     <select class="form-select" id="inputGroupSelect01" v-model="continuousModeStr">
-                        <option value="false" selected>单次任务</option>
-                        <option value="true">持续性任务</option>
+                        <option value="single" selected>单次任务</option>
+                        <option value="continuous">持续性任务</option>
                     </select>
                 </div>
 
                 <div class="input-group mb-3">
                     <span class="input-group-text">循环次数</span>
-                    <input type="text" class="form-control" placeholder="4" v-model="frequency">
+                    <input type="text" type="number" class="form-control" v-if="!continuousMode"
+                           v-model="singleTask.frequency">
+                    <input type="text" type="number" class="form-control" v-else v-model="continuousTask.frequency">
                 </div>
+
                 <div class="input-group mb-3">
                     <span class="input-group-text">自动添加理智次数</span>
-                    <input type="text" class="form-control" placeholder="0" v-model="sanityTimes">
+                    <input type="text" type="number" class="form-control" v-if="!continuousMode"
+                           v-model="singleTask.sanityTimes">
+                    <input type="text" type="number" class="form-control" v-else v-model="continuousTask.sanityTimes">
                 </div>
 
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" v-model="useStone">
+                    <input class="form-check-input" type="checkbox" role="switch" v-if="!continuousMode"
+                           v-model="singleTask.useStone">
+                    <input class="form-check-input" type="checkbox" role="switch" v-else
+                           v-model="continuousTask.useStone">
                     <label class="form-check-label">是否使用源石</label>
                 </div>
+
                 <div class="input-group mb-3" :style="continuousMode?'':'display: none'">
                     <span class="input-group-text">循环模式中, 任务间休眠时长(分钟)</span>
-                    <input type="text" class="form-control" placeholder="1"
-                           :class="continuousMode?'':'display: none'" v-model="intervalTime">
+                    <input type="text" class="form-control" placeholder="1" type="number"
+                           :class="continuousMode?'':'display: none'" v-model="continuousTask.intervalTime">
                 </div>
                 <div class="input-group mb-3" :style="continuousMode?'':'display: none'">
                     <span class="input-group-text">最低倍率(当理智>x * 关卡消耗)</span>
-                    <input type="text" class="form-control" placeholder="1"
-                           v-model="minStartMultiple">
+                    <input type="text" class="form-control" placeholder="1" type="number"
+                           v-model="continuousTask.minStartMultiple">
                 </div>
 
                 <div class="btn-group" role="group" aria-label="">
@@ -431,9 +440,6 @@
             return {
                 disableUpdate: false,
                 socket: socket,
-                frequency: 3,
-                sanityTimes: 0,
-                useStone: false,
                 deviceName: '',
                 disableFirstTimes: true,
                 resolution: {
@@ -477,7 +483,7 @@
                 continuousMode: false,
                 intervalTime: 3 * 60,
                 minStartMultiple: 1,
-                continuousModeStr: "false",
+                continuousModeStr: "single",
                 connectionError: false,
                 fightProgress: null,
                 listInfoGroupsStyle: {},
@@ -496,6 +502,19 @@
                 memoryLimitPercentage: 0.3,
                 dynamicMemory: false,
                 gpuDataUpdating: false,
+                // 任务相关
+                singleTask: {
+                    frequency: 3,
+                    sanityTimes: 0,
+                    useStone: false,
+                },
+                continuousTask: {
+                    frequency: 5,
+                    sanityTimes: 0,
+                    useStone: false,
+                    intervalTime: 3 * 60,
+                    minStartMultiple: 1
+                },
             }
         },
         methods: {
@@ -741,17 +760,20 @@
 
                     }
                     this.taskBufferLock = true;
-                    if (this.continuousModeStr !== "false") {
-                        this.frequency = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["frequency"];
-                        this.sanityTimes = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["sanityTimes"];
-                        this.useStone = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["useStone"];
-                        this.intervalTime = data["TaskBuffer"]["continuousTask"]["intervalTime"];
-                        this.minStartMultiple = data["TaskBuffer"]["continuousTask"]["minStartMultiple"];
-                    } else {
-                        this.frequency = data["TaskBuffer"]["singleTask"]["frequency"];
-                        this.sanityTimes = data["TaskBuffer"]["singleTask"]["sanityTimes"];
-                        this.useStone = data["TaskBuffer"]["singleTask"]["useStone"];
-                    }
+                    if (data["TaskBuffer"]["taskType"] === "single")
+                        this.continuousModeStr = "single";
+                    else
+                        this.continuousModeStr = "continuous";
+                    this.continuousTask.frequency = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["frequency"];
+                    this.continuousTask.sanityTimes = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["sanityTimes"];
+                    this.continuousTask.useStone = data["TaskBuffer"]["continuousTask"]["inlineSingleTask"]["useStone"];
+                    this.continuousTask.intervalTime = data["TaskBuffer"]["continuousTask"]["intervalTime"];
+                    this.continuousTask.minStartMultiple = data["TaskBuffer"]["continuousTask"]["minStartMultiple"];
+
+                    this.singleTask.frequency = data["TaskBuffer"]["singleTask"]["frequency"];
+                    this.singleTask.sanityTimes = data["TaskBuffer"]["singleTask"]["sanityTimes"];
+                    this.singleTask.useStone = data["TaskBuffer"]["singleTask"]["useStone"];
+
                     this.taskBufferLock = false;
                 }
 
@@ -894,19 +916,26 @@
         },
         mounted() {
             this.$watch(
-                (vm) => [vm.frequency, vm.sanityTimes, vm.useStone, vm.intervalTime, vm.minStartMultiple],
+                (vm) => [vm.singleTask, vm.continuousTask],
                 (val) => {
                     while (this.taskBufferLock) {
 
                     }
                     this.taskBufferLock = true
                     this.socket.emit('ChangeTaskBuffer', {
-                        frequency: this.frequency,
-                        sanityTimes: this.sanityTimes,
-                        useStone: this.useStone,
-                        intervalTime: this.intervalTime,
-                        minStartMultiple: this.minStartMultiple,
-                        type: this.continuousMode ? "continuous" : "single"
+                        singleTask: {
+                            frequency: val[0].frequency,
+                            sanityTimes: val[0].sanityTimes,
+                            useStone: val[0].useStone
+                        },
+                        continuousTask: {
+                            frequency: val[1].frequency,
+                            sanityTimes: val[1].sanityTimes,
+                            useStone: val[1].useStone,
+                            intervalTime: val[1].intervalTime,
+                            minStartMultiple: val[1].minStartMultiple
+                        },
+                        type: this.continuousModeStr
                     });
                     this.taskBufferLock = false
                 },
@@ -940,10 +969,11 @@
             },
             continuousModeStr: {
                 handler(newVal) {
-                    if (this.continuousModeStr === "true")
-                        this.continuousMode = true
-                    else
+                    if (this.continuousModeStr === "single")
                         this.continuousMode = false
+                    else
+                        this.continuousMode = true
+                    this.socket.emit('ChangeTaskBufferType', {type: this.continuousModeStr})
                 },
             },
             disableFirstTimes: {

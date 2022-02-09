@@ -51,26 +51,36 @@ def startTask(data):
 
 @socketio.on('ChangeTaskBuffer')
 def changeTaskBuffer(data):
-    frequency = int(data['frequency'])
-    sanityTimes = int(data['sanityTimes'])
-    useStone = bool(data['useStone'])
+    taskType = data['type']
+    try:
+        if taskType == 'single':
+            distributor.taskBuffer.taskType = 'single'
+            distributor.taskBuffer.singleTask.frequency = int(data['singleTask']['frequency'])
+            distributor.taskBuffer.singleTask.sanityTimes = int(data['singleTask']['sanityTimes'])
+            distributor.taskBuffer.singleTask.useStone = bool(data['singleTask']['useStone'])
+            distributor.saveTaskConfig()
+        else:
+            intervalTime = int(data['continuousTask']['intervalTime'])
+            minStartMultiple = int(data['continuousTask']['minStartMultiple'])
+            distributor.taskBuffer.taskType = 'continuousTask'
+            distributor.taskBuffer.continuousTask.intervalTime = intervalTime
+            distributor.taskBuffer.continuousTask.inlineSingleTask.frequency = int(data['continuousTask']['frequency'])
+            distributor.taskBuffer.continuousTask.inlineSingleTask.sanityTimes = int(data['continuousTask']['sanityTimes'])
+            distributor.taskBuffer.continuousTask.inlineSingleTask.useStone = bool(data['continuousTask']['useStone'])
+            distributor.taskBuffer.continuousTask.minStartMultiple = minStartMultiple
+            distributor.saveTaskConfig()
+    except Exception as e:
+        pass
+        #logger.warning(f"JavaScript 提供的数据非法, 请忽略该条 {e} ")
+
+
+@socketio.on('ChangeTaskBufferType')
+def changeTaskBufferType(data):
     taskType = data['type']
     if taskType == 'single':
         distributor.taskBuffer.taskType = 'single'
-        distributor.taskBuffer.singleTask.frequency = frequency
-        distributor.taskBuffer.singleTask.sanityTimes = sanityTimes
-        distributor.taskBuffer.singleTask.useStone = useStone
-        distributor.saveTaskConfig()
     else:
-        intervalTime = int(data['intervalTime'])
-        minStartMultiple = int(data['minStartMultiple'])
         distributor.taskBuffer.taskType = 'continuousTask'
-        distributor.taskBuffer.continuousTask.intervalTime = intervalTime
-        distributor.taskBuffer.continuousTask.inlineSingleTask.frequency = frequency
-        distributor.taskBuffer.continuousTask.inlineSingleTask.sanityTimes = sanityTimes
-        distributor.taskBuffer.continuousTask.inlineSingleTask.useStone = useStone
-        distributor.taskBuffer.continuousTask.minStartMultiple = minStartMultiple
-        distributor.saveTaskConfig()
 
 
 @socketio.on("ChangeGPUDeviceInfo")
