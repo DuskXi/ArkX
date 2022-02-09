@@ -13,6 +13,8 @@ from typing import Dict
 
 from Performance import recoder
 
+tf.get_logger().setLevel('ERROR')
+
 
 def set_gpu_memory(memory=3072):
     gpus = tf.config.experimental.list_physical_devices('GPU')

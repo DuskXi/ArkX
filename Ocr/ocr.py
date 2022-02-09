@@ -8,7 +8,7 @@ from Performance import recoder
 
 # 如果有莫名其妙的print， 请到 predict_system.py 里面删除
 class PDOcr:
-    def __init__(self, models, use_gpu=False, gpu_mem=2048) -> None:
+    def __init__(self, models, use_gpu=False, gpu_mem=1024) -> None:
         (det, cls, rec) = models
         self.ocr = PaddleOCR(det_model_dir=det, rec_model_dir=rec, cls_model_dir=cls, use_angle_cls=True, gpu_mem=gpu_mem, use_gpu=use_gpu)
 

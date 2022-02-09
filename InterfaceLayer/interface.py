@@ -51,8 +51,8 @@ class Interface:
         threading.Thread(target=self.device.keepScreenRefresh, args=()).start()
 
     # 加载光学文字识别模型
-    def loadOcr(self, det, cls, rec):
-        self.ocr = PDOcr((det, cls, rec))
+    def loadOcr(self, det, cls, rec, enableGPU=False, gpuMemoryLimit=1024):
+        self.ocr = PDOcr((det, cls, rec), use_gpu=enableGPU, gpu_mem=gpuMemoryLimit)
         logger.info("load ocr model")
         ''
 

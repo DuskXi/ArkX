@@ -54,6 +54,7 @@ class Distributor:
                 logger.error("无法启动GPU加速")
                 logger.warning("切换为CPU模式")
                 self.operate.interface.setConfig(GPULimit=True)
+                self.operate.initModel()
             else:
                 if gpuMemoryLimit == "dynamic":
                     self.operate.interface.setConfig(dynamicMemory=True)
@@ -64,11 +65,12 @@ class Distributor:
                     self.operate.interface.setConfig(Memory=gpuMemoryLimit)
                     logger.info("GPU显存被限制为{}MB".format(gpuMemoryLimit))
                 logger.debug(f"GPU设备: {sysInfo['GPU'][0]['description']} 已启用")
+                self.operate.initModel(enableGPU=True, ocrMemory=2048)
         else:
             logger.info("初始化CPU设备...")
             self.operate.interface.setConfig(GPULimit=True)
+            self.operate.initModel()
 
-        self.operate.initModel()
         self.neuralNetworksInited = True
 
     def newSingleTask(self, frequency, sanityTimes: int = 0, useStone: bool = False):
