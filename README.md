@@ -25,7 +25,7 @@
 
 ***该教程需要在Powershell中运行，请不要使用cmd，如果你使用的是conda，只允许执行pip命令时使用cmd***
 
-1. 创建一个目录，在该目录下执行: `git clone https://github.com/DuskXi/ArkX.git`
+1. 创建一个目录，在该目录下执行: `git clone -b v1.0.0 https://github.com/DuskXi/ArkX.git`
 2. 执行 `cd ArkX`
 3. 此处分两种情况，一种是懒得自己配置python环境的，直接去Release中下载配置好的python环境（过阵子就会发布），如果自己配置python环境，请跟随(4)开始的步骤
 4. 安装好python环境以及配置好环境变量, 3.7.x 以上即可
@@ -118,10 +118,14 @@ python main.py
 
 ---
 
+## 已实现
+
+- [X] 提供adb设备操作界面
+- [X] 显示系统信息(主要为GPU设备)
+- [X] 提供网络设备的连接功能
+
 ## 待实现
 
-- [ ] 提供adb设备操作界面
-- [X] 显示系统信息(主要为GPU设备)
 - [ ] 基于ffmpeg-python 对 H264解码进行GPU加速支持(cuvid,cuda,h264_amf,vaapi), 移除PyAV库
 
 ---
