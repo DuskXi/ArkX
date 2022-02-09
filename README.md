@@ -66,15 +66,22 @@ pip install .
 ```bash
 pip install git+https://github.com/philferriere/cocoapi.git#subdirectory=PythonAPI
 ```
-13. 修改部分import, 在目录`Lib\site-packages\object_detection\utils`中修改以下文件中的`import tensorflow as tf` 为 `import tensorflow.compat.v1 as tf`
+13. 修改部分import, 在python目录`Lib/site-packages/object_detection/utils`中修改以下文件中的`import tensorflow as tf` 为 `import tensorflow.compat.v1 as tf`
 ```
 label_map_util.py
 ops.py
 visualization_utils.py
 ```
 
-15. 从这步开始，自行安装环境和直接下载环境的开始合并
-16. 安装完成后，在ArkX目录下执行以下命令(如果是直接从Release中下载的python环境，则需要在python前面加上路径，或者自行设置环境变量):
+14. 如果不想看到每次ocr检测都输出两行ocr日志碍眼, 可以修改`{python目录}/Lib/site-packages/paddleocr/tools/infer`文件, 把文件中如下两行给注释掉:
+```python
+print("dt_boxes num : {}, elapse : {}".format(len(dt_boxes), elapse))
+print("rec_res num  : {}, elapse : {}".format(len(rec_res), elapse))
+```
+这两个语句在`def __call__(self, img):`函数中
+
+16. 从这步开始，自行安装环境和直接下载环境的开始合并
+17. 安装完成后，在ArkX目录下执行以下命令(如果是直接从Release中下载的python环境，则需要在python前面加上路径，或者自行设置环境变量):
 
 ```bash
 python main.py
