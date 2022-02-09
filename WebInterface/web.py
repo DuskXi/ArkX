@@ -126,6 +126,11 @@ def connectToDevice(data):
     distributor.initDevice(device)
 
 
+@socketio.on('ConnectToIPAddress')
+def connectToIPAddress(data):
+    distributor.connectToIPAddress(data['ipAddress'])
+
+
 @socketio.on('DisconnectDevice')
 def disconnectDevice():
     distributor.disconnectDevice()

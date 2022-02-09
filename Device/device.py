@@ -86,3 +86,9 @@ class DeviceManager:
                     devices.append([device, status])
 
         return devices
+
+    def connectToIPAddress(self, ipAddress):
+        adb = subprocess.Popen([self.adb_path, 'connect', ipAddress], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        adb.wait()
+        result, error = adb.communicate()
+        logger.debug("成功连接设备 {}".format(result.decode('utf-8')))

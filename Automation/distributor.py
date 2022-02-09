@@ -40,6 +40,9 @@ class Distributor:
         self.automation = automation
         self.initIng = False
 
+    def connectToIPAddress(self, ipAddress):
+        self.operate.deviceManager.connectToIPAddress(ipAddress)
+
     def initNeuralNetworks(self, enableGPU=False, gpuMemoryLimit=None):
         if enableGPU:
             logger.info("已启用GPU加速模式")
