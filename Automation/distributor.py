@@ -193,13 +193,15 @@ class TaskBuffer:
         with open(path, "w") as f:
             json.dump({
                 "singleTask": self.singleTask.__dict__,
-                "continuousTask": self.continuousTask.getAsDict()
+                "continuousTask": self.continuousTask.getAsDict(),
+                "taskType": self.taskType
             }, f)
 
     def getAsDict(self):
         return {
             "singleTask": self.singleTask.__dict__,
-            "continuousTask": self.continuousTask.getAsDict()
+            "continuousTask": self.continuousTask.getAsDict(),
+            "taskType": self.taskType
         }
 
     class SingleTask:
