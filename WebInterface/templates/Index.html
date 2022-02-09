@@ -193,7 +193,8 @@
                         <label class="form-check-label">启用动态显存</label>
                     </div>
                     <h5 v-if="gpu.length > 0 " :disabled="!enableGPU">显存限制:
-                        {{dynamicMemory? "动态" :sizeToString(gpu[0].memoryValue * memoryLimitPercentage)}}</h5>
+                        {{dynamicMemory? "动态" :sizeToString(gpu[0].memoryValue * (1024 * 1024) *
+                        memoryLimitPercentage)}}</h5>
                     <input type="range" class="form-range" min="0" max="1" step="0.01"
                            v-if="gpu.length > 0" v-model="memoryLimitPercentage"
                            :disabled="dynamicMemory || !enableGPU">
