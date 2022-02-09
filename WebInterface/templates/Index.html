@@ -631,18 +631,18 @@
                 this.startButtonEnabled = false;
                 if (this.continuousMode) {
                     this.socket.emit('StartTask', {
-                        frequency: this.frequency,
-                        sanityTimes: this.sanityTimes,
-                        useStone: this.useStone,
-                        intervalTime: this.intervalTime,
-                        minStartMultiple: this.minStartMultiple,
+                        frequency: this.continuousTask.frequency,
+                        sanityTimes: this.continuousTask.sanityTimes,
+                        useStone: this.continuousTask.useStone,
+                        intervalTime: this.continuousTask.intervalTime,
+                        minStartMultiple: this.continuousTask.minStartMultiple,
                         type: 'continuous'
                     });
                 } else {
                     this.socket.emit('StartTask', {
-                        frequency: this.frequency,
-                        sanityTimes: this.sanityTimes,
-                        useStone: this.useStone,
+                        frequency: this.singleTask.frequency,
+                        sanityTimes: this.singleTask.sanityTimes,
+                        useStone: this.singleTask.useStone,
                         type: 'single'
                     });
                 }
