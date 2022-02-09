@@ -52,6 +52,7 @@ def startTask(data):
 @socketio.on('ChangeTaskBuffer')
 def changeTaskBuffer(data):
     taskType = data['type']
+    # noinspection PyBroadException
     try:
         if taskType == 'single':
             distributor.taskBuffer.taskType = 'single'
@@ -69,9 +70,9 @@ def changeTaskBuffer(data):
             distributor.taskBuffer.continuousTask.inlineSingleTask.useStone = bool(data['continuousTask']['useStone'])
             distributor.taskBuffer.continuousTask.minStartMultiple = minStartMultiple
             distributor.saveTaskConfig()
-    except Exception as e:
+    except Exception:
         pass
-        #logger.warning(f"JavaScript 提供的数据非法, 请忽略该条 {e} ")
+        # logger.warning(f"JavaScript 提供的数据非法, 请忽略该条 {e} ")
 
 
 @socketio.on('ChangeTaskBufferType')
