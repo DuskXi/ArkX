@@ -26,11 +26,11 @@ class Operate:
         self.labelsName = LabelsName(**labelsName)
         self.deviceManager = DeviceManager(adb_path)
 
-    def initModel(self):
+    def initModel(self, enableGPU=False, ocrMemory=1024):
         self.interface.loadObjectDetectionModel(self.objectModel.name, self.objectModel.path, self.objectModel.pbtxt)
         self.interface.loadObjectDetectionModel(self.sanityModel.name, self.sanityModel.path, self.sanityModel.pbtxt)
         self.interface.loadImageClassificationModel(self.classifyModel.name, self.classifyModel.path, self.classifyModel.labels)
-        self.interface.loadOcr(self.ocrModel.det, self.ocrModel.cls, self.ocrModel.rec)
+        self.interface.loadOcr(self.ocrModel.det, self.ocrModel.cls, self.ocrModel.rec, enableGPU, ocrMemory)
 
     def loadDevices(self, device_name=None):
         self.interface.loadAndroid(self.adb_path, device_name=device_name)
