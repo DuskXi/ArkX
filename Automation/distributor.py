@@ -6,7 +6,9 @@ import threading
 from Performance import recoder
 from .operate import Operate
 from .task import *
-from tensorflow.python.client import device_lib
+import GPUtil
+import tensorflow as tf
+import psutil
 
 
 # noinspection PyTypeChecker
@@ -28,6 +30,8 @@ class Distributor:
         # 初始化状态
         self.initIng = False
         self.neuralNetworksInited = False
+        if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
+            self.operate.interface.setConfig(dynamicMemory=True)
 
     def initDevice(self, device_name=None):
         self.initIng = True
@@ -52,16 +56,15 @@ class Distributor:
                     self.operate.interface.setConfig(dynamicMemory=True)
                     logger.info("GPU设置为动态显存")
                 else:
-                    gpuMemoryLimit *= sysInfo["GPU"][0]["memoryValue"] / 1024 / 1024
+                    gpuMemoryLimit *= sysInfo["GPU"][0]["memoryValue"]
                     gpuMemoryLimit = int(gpuMemoryLimit)
                     self.operate.interface.setConfig(Memory=gpuMemoryLimit)
                     logger.info("GPU显存被限制为{}MB".format(gpuMemoryLimit))
-                deviceName = re.search(r"(?<=name:).+?(?=,)", sysInfo["GPU"][0]["description"])
-                deviceName = deviceName.group(0) if deviceName else "UNKNOWN Device"
-                logger.debug(f"GPU设备: {deviceName} 已启用")
+                logger.debug(f"GPU设备: {sysInfo['GPU'][0]['description']} 已启用")
         else:
             logger.info("初始化CPU设备...")
             self.operate.interface.setConfig(GPULimit=True)
+
         self.operate.initModel()
         self.neuralNetworksInited = True
 
@@ -144,13 +147,15 @@ class Distributor:
 
     def getSystemInfo(self):
         results = {"CPU": [], "GPU": []}
-        devices = device_lib.list_local_devices()
-        for device in devices:
-            if device.device_type == "CPU":
-                results["CPU"].append({"name": device.name, "maxMemory": self.memoryToString(device.memory_limit), "memoryValue": float(device.memory_limit)})
-            elif device.device_type == "GPU":
-                results["GPU"].append(
-                    {"name": device.name, "maxMemory": self.memoryToString(device.memory_limit), "memoryValue": float(device.memory_limit), "description": device.physical_device_desc})
+        physical_devices = GPUtil.getGPUs()
+        pc_mem = psutil.virtual_memory()
+        for cpu in tf.config.experimental.list_physical_devices('CPU'):
+            results["CPU"].append({"name": cpu.name, "maxMemory": self.memoryToString(pc_mem.available), "memoryValue": float(pc_mem.available)})
+        index = 0
+        for gpu in tf.config.experimental.list_physical_devices('GPU'):
+            results["GPU"].append({"name": gpu.name, "maxMemory": self.memoryToString(physical_devices[index].memoryFree * 1024 * 1024), "memoryValue": float(physical_devices[index].memoryFree),
+                                   "description": physical_devices[index].name})
+            index += 1
         return results
 
     @staticmethod
