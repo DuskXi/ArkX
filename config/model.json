@@ -11,7 +11,14 @@
   },
   "imageClassificationModel": {
     "modelName": "icModel",
-    "filePath": "model/ICModel/icModel.h5",
+    "filePath": "model/ICModel",
+    "fileName": "icModel.h5",
+    "files": [
+      "icModel.h5.0",
+      "icModel.h5.1",
+      "icModel.h5.2",
+      "icModel.h5.3"
+    ],
     "labels": [
       "AddSanity",
       "LevelList",
