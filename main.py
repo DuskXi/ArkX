@@ -2,6 +2,8 @@ import os
 
 import json
 
+from File.file import File
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
@@ -18,6 +20,14 @@ def main():
     modelConfig = json.loads(fileRead("config/model.json"))
     labelsName = json.loads(fileRead("config/labelsName.json"))
     config = json.loads(fileRead("config/config.json"))
+
+    file = File()
+    classifyModel = modelConfig["imageClassificationModel"]
+    if file.mergedFile(classifyModel["filePath"], classifyModel["fileName"], classifyModel["files"]):
+        print("文件合并失败")
+        print("回车退出")
+        input()
+        exit(0)
 
     recoder.Recoder.debug = False
     recoder.Recoder.debugSleepingTime = 60 * 60
