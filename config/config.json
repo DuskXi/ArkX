@@ -1,1 +1,1 @@
-{"adb_path": "Device/adb/adb.exe", "EnableGPU": true, "GPUMemoryLimit": 0.3, "DynamicMemory": true}
+{"adb_path": "Device/adb/adb.exe", "EnableGPU": false, "GPUMemoryLimit": 0.3, "DynamicMemory": false}
