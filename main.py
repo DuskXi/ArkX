@@ -21,18 +21,19 @@ def main():
     labelsName = json.loads(fileRead("config/labelsName.json"))
     config = json.loads(fileRead("config/config.json"))
 
-    file = File()
+    # file = File()
     classifyModel = modelConfig["imageClassificationModel"]
-    if file.mergedFile(classifyModel["filePath"], classifyModel["fileName"], classifyModel["files"]):
-        print("文件合并失败")
-        print("回车退出")
-        input()
-        exit(0)
+    # if not file.mergedFile(classifyModel["filePath"], classifyModel["fileName"], classifyModel["files"]):
+    #     print("文件合并失败")
+    #     print("回车退出")
+    #     input()
+    #     exit(0)
 
     recoder.Recoder.debug = False
     recoder.Recoder.debugSleepingTime = 60 * 60
     recoder.Recoder.initDataSet([modelConfig["objectDetectionModel"]["modelName"], modelConfig["addSanityModel"]["modelName"]],
-                                [modelConfig["imageClassificationModel"]["modelName"]])
+                                [classifyModel["modelName"]])
+    # modelConfig["imageClassificationModel"]["filePath"] = os.path.join(classifyModel["filePath"], classifyModel["fileName"])
 
     distributor = Distributor(modelConfig, config["adb_path"], labelsName)
     web.run(distributor, config)

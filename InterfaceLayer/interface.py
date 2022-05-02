@@ -40,8 +40,8 @@ class Interface:
         logger.info("load object detection model[ " + name + ":" + path + "]")
 
     # 加载图像分类模型
-    def loadImageClassificationModel(self, name, path, labels):
-        self.cnnCore.loadICModel(name, path, labels)
+    def loadImageClassificationModel(self, name, path, labels, resolution):
+        self.cnnCore.loadICModel(name, path, labels, resolution)
         logger.info("load classify model[ " + name + ":" + path + "]")
 
     # 加载手机控制器

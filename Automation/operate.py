@@ -17,7 +17,8 @@ class Operate:
                                          "pbtxt": modelConfig["addSanityModel"]["pbtxt"]})
         self.classifyModel = DictObject(**{"name": modelConfig["imageClassificationModel"]["modelName"],
                                            "path": modelConfig["imageClassificationModel"]["filePath"],
-                                           "labels": modelConfig["imageClassificationModel"]["labels"]})
+                                           "labels": modelConfig["imageClassificationModel"]["labels"],
+                                           "resolution": modelConfig["imageClassificationModel"]["resolution"]})
         self.ocrModel = DictObject(**{"det": modelConfig["ocrModel"]["det"],
                                       "cls": modelConfig["ocrModel"]["cls"],
                                       "rec": modelConfig["ocrModel"]["rec"]})
@@ -29,7 +30,7 @@ class Operate:
     def initModel(self, enableGPU=False, ocrMemory=1024):
         self.interface.loadObjectDetectionModel(self.objectModel.name, self.objectModel.path, self.objectModel.pbtxt)
         self.interface.loadObjectDetectionModel(self.sanityModel.name, self.sanityModel.path, self.sanityModel.pbtxt)
-        self.interface.loadImageClassificationModel(self.classifyModel.name, self.classifyModel.path, self.classifyModel.labels)
+        self.interface.loadImageClassificationModel(self.classifyModel.name, self.classifyModel.path, self.classifyModel.labels, self.classifyModel.resolution)
         self.interface.loadOcr(self.ocrModel.det, self.ocrModel.cls, self.ocrModel.rec, enableGPU, ocrMemory)
 
     def loadDevices(self, device_name=None):
@@ -164,6 +165,7 @@ class DictObject:
         self.path = None
         self.pbtxt = None
         self.labels = None
+        self.resolution = None
         self.det = None
         self.cls = None
         self.rec = None

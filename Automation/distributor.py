@@ -1,7 +1,9 @@
 import json
 import os
 import re
+import hashlib
 import threading
+from File.file import File
 
 from Performance import recoder
 from .operate import Operate
@@ -33,6 +35,31 @@ class Distributor:
         if len(tf.config.experimental.list_physical_devices('GPU')) > 0:
             self.operate.interface.setConfig(dynamicMemory=True)
 
+    def initModelFile(self):
+        icModelConfig = self.modelConfig["imageClassificationModel"]
+        icPath = icModelConfig["dir"]
+        icModelFileName = icModelConfig["fileName"]
+        icModelSplitFiles = icModelConfig["files"]
+        if not os.path.exists(os.path.join(icPath, icModelFileName)):
+            file = File()
+            file.mergedFile(icPath, icModelFileName, icModelSplitFiles)
+            hash_str_cal = self.file_hash(os.path.join(icPath, icModelFileName), hashlib.sha256)
+            with open(os.path.join(icPath, icModelFileName + ".sha256"), "r") as f:
+                hash_str_source = f.read()
+            if hash_str_cal != hash_str_source:
+                raise Exception("文件合并失败")
+
+    @staticmethod
+    def file_hash(file_path: str, hash_method) -> str:
+        if not os.path.isfile(file_path):
+            print('文件不存在。')
+            return ''
+        h = hash_method()
+        with open(file_path, 'rb') as f:
+            for chunk in iter(lambda: f.read(8192), b''):
+                h.update(chunk)
+        return h.hexdigest()
+
     def initDevice(self, device_name=None):
         self.initIng = True
         automation = Automation(self.operate, self.labelsName, None)
@@ -44,6 +71,7 @@ class Distributor:
         self.operate.deviceManager.connectToIPAddress(ipAddress)
 
     def initNeuralNetworks(self, enableGPU=False, gpuMemoryLimit=None):
+        self.initModelFile()
         if enableGPU:
             logger.info("已启用GPU加速模式")
             logger.info("正在检查GPU设备")

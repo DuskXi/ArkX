@@ -50,6 +50,7 @@ class ConvolutionalNeuralNetworkCore:
     def __init__(self):
         self.dictODModel: Dict[str, ModelObjectDetection] = {}
         self.dictICModel: Dict[str, ModelImageClassification] = {}
+        self.resize_info: Dict[str, list] = {}
 
     def loadODModel(self, name, path, pbtxt):
         """
@@ -91,9 +92,10 @@ class ConvolutionalNeuralNetworkCore:
         """
         return self.dictODModel[name].getBoxData(im_width, im_height)
 
-    def loadICModel(self, name, path, classes):
+    def loadICModel(self, name, path, classes, resolution):
         """
         加载图像分类模型
+        :param resolution:
         :param name: 模型id
         :param path: 模型路径
         :param classes: id与label名的对应关系
@@ -102,6 +104,7 @@ class ConvolutionalNeuralNetworkCore:
         model = ModelImageClassification()
         model.loadModel(name, path, classes)
         self.dictICModel[name] = model
+        self.resize_info[name] = resolution
 
     def classifyImages(self, name, image) -> dict:
         """
@@ -110,7 +113,7 @@ class ConvolutionalNeuralNetworkCore:
         :param image: 图像(ndarray)
         :return: 原始分类数据
         """
-        image_np = np.array(Image.fromarray(image.copy()).resize((960, 540)))
+        image_np = np.array(Image.fromarray(image.copy()).resize((self.resize_info[name][0], self.resize_info[name][1])))
         return self.dictICModel[name].classifyImages(np.array([image_np]))
 
     def getClassification(self, name, image) -> [str]:
@@ -120,7 +123,7 @@ class ConvolutionalNeuralNetworkCore:
         :param image: 图像(ndarray)
         :return: 可能性最大的图像类型
         """
-        image_np = np.array(Image.fromarray(image.copy()).resize((960, 540)))
+        image_np = np.array(Image.fromarray(image.copy()).resize((self.resize_info[name][0], self.resize_info[name][1])))
         return self.dictICModel[name].getClassification(np.array([image_np]))
 
     def getClassificationFromBuffer(self, name) -> [str]:
